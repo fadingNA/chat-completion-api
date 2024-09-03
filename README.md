@@ -1,6 +1,3 @@
-# Creating a markdown file for the provided README content
-
-readme_content = """
 # Chat Completion API
 
 A simple tool to utilize OpenAI's Chat Completion API for various natural language processing tasks. This tool is designed for the **OSD-600 Release 0.x** project.
