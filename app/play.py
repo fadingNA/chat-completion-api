@@ -192,14 +192,26 @@ async def get_completion(input_text, output_file, temperature, max_tokens, api_k
             model = model if model else "gpt-4o",
             temperature = temperature if temperature else 0.5,
             max_tokens = max_tokens if max_tokens else 100,
-            max_retries=3,
+            max_retries=2,
         )
+
+        message = [
+            (
+                "system",
+                "You are a helpful assistant with the general knowledge of a human mind. please provide at least 3 sentences of context to generate a completion.",
+            ),
+            (
+                "human", f"{input_text}"
+            )
+        ]
 
         # async for chunk in response.astream(input_text):
         answer = []
-        for chunk in response.stream(input_text):
-            print(chunk, end="", flush=True)
-            answer.append(chunk)
+        for chunk in response.stream(message):
+            # AIMessageChunk is an object that contains the content of the message
+            # using '.' to access the content of the message not ['content']
+            print(chunk.content, end="", flush=True)
+            answer.append(chunk.content)
             
 
         """ 

@@ -6,7 +6,7 @@ from datetime import datetime
 import pytz
 
 from openai import OpenAI
-from langchain_openai import OpenAI as LangChainOpenAI
+from langchain_openai import ChatOpenAI as LangChainOpenAI
 import pprint
 #from langchain_openai import OpenAI
 
