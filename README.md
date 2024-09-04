@@ -17,7 +17,7 @@ References [Langchain Document](https://api.python.langchain.com/en/latest/llms/
 
 | Name          | Blog Post (URL)                  | GitHub Repo (URL)                       | Language    |
 |---------------|---------------------------------|-----------------------------------------|-------------|
-| Nonthachai Plodthong    | [Blog Post](https://dev.to/fadingna/open-source-development-187j) | [GitHub Repo](https://github.com/fadingNA/chat-completion-api/examples) | Python + SSH |
+| Nonthachai Plodthong    | [Blog Post](https://dev.to/fadingna/open-source-development-187j) | [GitHub Repo](https://github.com/fadingNA/chat-completion-api) | Python + SSH |
 
 ## Overview
 
