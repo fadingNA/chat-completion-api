@@ -95,8 +95,7 @@ def get_available_models():
             if api_key is None:
                 raise Exception("API Key is missing")
 
-            print(f"Retrieving available models from OpenAI...")
-            print(f"Your API Key: {api_key}")
+            logger.info(f"Retrieving available models from OpenAI..")
             # Make a request to OpenAI API
             headers = {
                 "Authorization": f"Bearer {api_key}"
@@ -105,6 +104,7 @@ def get_available_models():
 
             # Check for a successful request
             if response.status_code == 200:
+                logger.info("Available models retrieved successfully.")
                 return response.json()
             else:
                 logger.error(f"Failed to retrieve models: {response.status_code} - {response.text}")
@@ -116,22 +116,44 @@ def get_available_models():
 
 ## ADDITIONAL FUNCTIONS TO Set the temperature, max_tokens, api_key, and model
 def set_temperature():
+    """
+    Retrieve temperature from command-line arguments.
+    
+    Returns:
+    str: temperature if provided, None otherwise
+    """
     try:
         if  '--temperature' in sys.argv or '-t' in sys.argv:
+            logger.info(f"Temperature: {sys.argv[sys.argv.index('--temperature') + 1]}")
             return sys.argv[sys.argv.index('--temperature') + 1]
     except Exception as e:
         logger.error(f"Error in get_input at line {e.__traceback__.tb_lineno}: {e}")
         return None
     
 def set_max_tokens():
+    """
+    Retrieve max tokens from command-line arguments.
+
+    Returns:
+    str: max tokens if provided, None using the default value.
+    
+    """
     try:
         if '--max_tokens' in sys.argv:
+            logger.info(f"Max Tokens: {sys.argv[sys.argv.index('--max_tokens') + 1]}")
             return sys.argv[sys.argv.index('--max_tokens') + 1]
     except Exception as e:
         logger.error(f"Error in get_input at line {e.__traceback__.tb_lineno}: {e}")
         return None
     
 def set_base_url():
+    """
+    Setting the base URL for the API request.
+
+    Returns:
+    str: base URL if provided, None otherwise.
+    
+    """
     try:
         if '--base-url' in sys.argv or '-u' in sys.argv:
             return sys.argv[sys.argv.index('--base-url') + 1]
@@ -164,6 +186,13 @@ def set_api_key():
         return None
 
 def set_model():
+    """
+    Set the model for the completion.
+
+    Returns:
+    str: model if provided, gpt-4o otherwise.
+    
+    """
     try:
         if '--model' in sys.argv or '-m' in sys.argv:
             return sys.argv[sys.argv.index('--model') + 1]
@@ -172,18 +201,38 @@ def set_model():
         return None
 
 async def get_completion(input_text, output_file, temperature, max_tokens, api_key, model, context = None):
+    """
+    Call the Langchain ChatOpenAI Completion API to generate the completion.
+
+    Parameters:
+    input_text (str): The input text to generate the completion.
+    output_file (str): The output file to save the generated completion.
+    temperature (str): The temperature for the completion.
+    max_tokens (str): The maximum tokens for the completion.
+    api_key (str): The OpenAI API key.
+    model (str): The model for the completion.
+    context (str): The context for the completion.
+    
+    Returns:
+    str: The generated completion or None if an error occurs.
+
+    """
+    
+    
     try:
         if api_key is None:
             raise ValueError("API Key is missing")
         # LangchainOpenAI is a class that inherits from OpenAI
 
-        # Debug
-        print(f"API Key: {api_key}")
-        print(f"Model: {model}")
-        print(f"Temperature: {temperature}")
-        print(f"Max Tokens: {max_tokens}")
-        print(f"Input Text: {input_text}")
-        print(f"Cotext: {context}")
+        if input_text is None:
+            raise ValueError("Input text is missing")
+
+        # Debugging the input parameters
+        logger.info(f"Model: {model}")
+        logger.info(f"Temperature: {temperature}")
+        logger.info(f"Max Tokens: {max_tokens}")
+        logger.info(f"Input Text: {input_text}")
+        logger.info(f"Cotext: {context}")
 
         response = LangChainOpenAI(
             base_url = set_base_url(),
@@ -209,7 +258,7 @@ async def get_completion(input_text, output_file, temperature, max_tokens, api_k
         for chunk in response.stream(message):
             # AIMessageChunk is an object that contains the content of the message
             # using '.' to access the content of the message not ['content']
-            print(chunk.content, end="", flush=True)
+            logger.info(chunk.content, end="", flush=True)
             answer.append(chunk.content)
             
 
@@ -226,10 +275,10 @@ async def get_completion(input_text, output_file, temperature, max_tokens, api_k
         )
         for chunk in response:
             if chunk.choices[0].delta.content is not None:
-                print(chunk.choices[0].delta.content, end="")
+                logger.info(chunk.choices[0].delta.content, end="")
         """
         
-        print("\n\nCompletion generated successfully.")
+        logger.info("\n\nCompletion generated successfully.")
         completed_answer = "".join(answer)
         if output_file:
         # Write to the specified output file
@@ -249,6 +298,10 @@ async def get_completion(input_text, output_file, temperature, max_tokens, api_k
 async def main():
     # Check for file arguments
     context = None
+
+    # Check if argv[1] is provided and if it is a file we read the context from the file 
+    # The context can be a JSON file or a text file
+    # then using context with LLM Prompt to generate the completion
     if len(sys.argv) > 1:
         file_path = sys.argv[1]
         if os.path.exists(file_path):
@@ -256,7 +309,7 @@ async def main():
                 logger.info(f"Reading context from JSON file: {file_path}")
                 with open(file_path, "r") as f:
                     context = json.load(f)
-                    context = json.dumps(context, indent=4) # using indent 4 for pretty print
+                    context = json.dumps(context, indent=4) # using indent 4 for pretty logger.info
             else:
                 logger.info(f"Reading context from text file: {file_path}")
                 with open(file_path, "r") as f:
@@ -266,28 +319,32 @@ async def main():
             context = None
 
     # Check if the version flag is present
-
     version = get_version()
     if version:
-        print(f"{TOOL_NAME} {version}")
-        return  # Exit the script after printing the version
+        logger.info(f"{TOOL_NAME} {version}")
+        return  # Exit the script after logger.infoing the version
     
+    # Check if the help flag is present
     help = get_help()
     if help:
-        print(help)
+        logger.info(help)
         return
 
+    # Check if the models flag is present
     get_models_from_open_ai = get_available_models()
     if get_models_from_open_ai:
-            print("Available models from OpenAI:")
+            logger.info("Available models from OpenAI:")
             pprint.pprint(get_models_from_open_ai)
             return
 
+    # Get the API key from the command-line arguments  --api_key or -a
     api_key = set_api_key()
     if not api_key:
         logger.error("API Key is missing. Please provide it using '--api_key' or '-a'.")
         return
     
+
+    # Get the input text from the command-line arguments --input_text or -i
     input_text = get_input()
     if not input_text:
         logger.error("Input text is missing. Please provide it using '--input_text' or '-i'.")
@@ -305,7 +362,7 @@ async def main():
         )
     
     if completion:
-        print(f"\n\nCompletion generated successfully:\n\n")
+        logger.info(f"\n\nCompletion generated successfully:\n\n")
     
 
 if __name__ == '__main__':
