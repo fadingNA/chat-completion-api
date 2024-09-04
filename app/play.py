@@ -1,5 +1,6 @@
 import sys
 import os
+import json
 
 # NEED TO ADD THIS LINE TO IMPORT THE CONFIG FILE
 # This is needed to import the config file from the parent directory
@@ -170,9 +171,6 @@ def set_model():
         logger.error(f"Error in get_input at line {e.__traceback__.tb_lineno}: {e}")
         return None
 
-
-## Ollama API to get Completion
-
 async def get_completion(input_text, output_file, temperature, max_tokens, api_key, model, context = None):
     try:
         if api_key is None:
@@ -199,8 +197,7 @@ async def get_completion(input_text, output_file, temperature, max_tokens, api_k
         message = [
             (
                 "system",
-                f"You are a helpful assistant with the general knowledge of a human mind. please provide at least 3 sentences of context to generate a completion.
-                {context}" if context else "You are a helpful assistant with the general knowledge of a human mind. please provide at least 3 sentences of context to generate a completion.",
+                f"You are a professional analyst who is working on a different and you will use {context} as context and then provide answer based on user question.",
             ),
             (
                 "human", f"{input_text}"
@@ -255,11 +252,18 @@ async def main():
     if len(sys.argv) > 1:
         file_path = sys.argv[1]
         if os.path.exists(file_path):
-            with open(file_path, "r") as f:
-                context = f.read()
+            if file_path.endswith(".json"):
+                logger.info(f"Reading context from JSON file: {file_path}")
+                with open(file_path, "r") as f:
+                    context = json.load(f)
+                    context = json.dumps(context, indent=4) # using indent 4 for pretty print
+            else:
+                logger.info(f"Reading context from text file: {file_path}")
+                with open(file_path, "r") as f:
+                    context = f.read()
         else:
             logger.error(f"File not found: {file_path}")
-        return
+            context = None
 
     # Check if the version flag is present
 
