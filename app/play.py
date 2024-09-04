@@ -39,8 +39,8 @@ def get_help():
     str: help message
     """
     try:
-        if '--help' in sys.argv or '-h' in sys.argv or '--howto' in sys.argv:
-            return f"""
+        print(f"comehere")
+        return f"""
             {TOOL_NAME} - A simple CLI tool to do Chat Completion from OpenAI
 
             Usage:
@@ -64,12 +64,7 @@ def get_help():
 def get_input():
     try:
         # Check if '--input_text' or '-i' is in the command-line arguments
-        if '--input_text' in sys.argv:
-            return sys.argv[sys.argv.index('--input_text') + 1]
-        elif '-i' in sys.argv:
-            return sys.argv[sys.argv.index('-i') + 1]
-        else:
-            raise ValueError("Input text is missing")
+        return sys.argv[sys.argv.index('--input_text') + 1] if '--input_text' in sys.argv else sys.argv[sys.argv.index('-i') + 1]
     except Exception as e:
         logger.error(f"Error in get_input at line {e.__traceback__.tb_lineno}: {e}")
         return None
@@ -82,7 +77,7 @@ def get_output():
         logger.error(f"Error in get_input at line {e.__traceback__.tb_lineno}: {e}")
         return None
 
-def get_available_models():
+def get_available_models(api_key=None):
     """
     Retrieve the list of available models from OpenAI.
 
@@ -91,7 +86,7 @@ def get_available_models():
     """
     try:
         if '--models' in sys.argv:
-            api_key = set_api_key()
+            api_key = api_key or sys.argv[sys.argv.index('--api_key') + 1] if '--api_key' in sys.argv else sys.argv[sys.argv.index('-a') + 1]
             if api_key is None:
                 raise Exception("API Key is missing")
 
@@ -115,92 +110,8 @@ def get_available_models():
         return None
 
 ## ADDITIONAL FUNCTIONS TO Set the temperature, max_tokens, api_key, and model
-def set_temperature():
-    """
-    Retrieve temperature from command-line arguments.
     
-    Returns:
-    str: temperature if provided, None otherwise
-    """
-    try:
-        if  '--temperature' in sys.argv or '-t' in sys.argv:
-            logger.info(f"Temperature: {sys.argv[sys.argv.index('--temperature') + 1]}")
-            return sys.argv[sys.argv.index('--temperature') + 1]
-    except Exception as e:
-        logger.error(f"Error in get_input at line {e.__traceback__.tb_lineno}: {e}")
-        return None
-    
-def set_max_tokens():
-    """
-    Retrieve max tokens from command-line arguments.
-
-    Returns:
-    str: max tokens if provided, None using the default value.
-    
-    """
-    try:
-        if '--max_tokens' in sys.argv:
-            logger.info(f"Max Tokens: {sys.argv[sys.argv.index('--max_tokens') + 1]}")
-            return sys.argv[sys.argv.index('--max_tokens') + 1]
-    except Exception as e:
-        logger.error(f"Error in get_input at line {e.__traceback__.tb_lineno}: {e}")
-        return None
-    
-def set_base_url():
-    """
-    Setting the base URL for the API request.
-
-    Returns:
-    str: base URL if provided, None otherwise.
-    
-    """
-    try:
-        if '--base-url' in sys.argv or '-u' in sys.argv:
-            return sys.argv[sys.argv.index('--base-url') + 1]
-    except Exception as e:
-        logger.error(f"Error in set_base_url at line {e.__traceback__.tb_lineno}: {e}")
-        return None
-
-def set_api_key():
-    """
-    Retrieve API key from command-line arguments.
-
-    Returns:
-    str: API key if provided, None otherwise.
-    """
-    try:
-        if '--api_key' in sys.argv:
-            return sys.argv[sys.argv.index('--api_key') + 1]
-        elif '-a' in sys.argv:
-            return sys.argv[sys.argv.index('-a') + 1]
-        else:
-            raise ValueError("API Key is missing")
-    except ValueError as e:
-        logger.error(f"Error in set_api_key at line {e.__traceback__.tb_lineno}: {e}")
-        return None
-    except IndexError:
-        logger.error("Error: '--api_key' or '-a' flag provided without a value.")
-        return None
-    except Exception as e:
-        logger.error(f"Unexpected error in set_api_key at line {e.__traceback__.tb_lineno}: {e}")
-        return None
-
-def set_model():
-    """
-    Set the model for the completion.
-
-    Returns:
-    str: model if provided, gpt-4o otherwise.
-    
-    """
-    try:
-        if '--model' in sys.argv or '-m' in sys.argv:
-            return sys.argv[sys.argv.index('--model') + 1]
-    except Exception as e:
-        logger.error(f"Error in get_input at line {e.__traceback__.tb_lineno}: {e}")
-        return None
-
-async def get_completion(input_text, output_file, temperature, max_tokens, api_key, model, context = None):
+async def get_completion(input_text, output_file, base_url, temperature, max_tokens, api_key, model, context = None):
     """
     Call the Langchain ChatOpenAI Completion API to generate the completion.
 
@@ -235,7 +146,7 @@ async def get_completion(input_text, output_file, temperature, max_tokens, api_k
         logger.info(f"Cotext: {context}")
 
         response = LangChainOpenAI(
-            base_url = set_base_url(),
+            base_url = base_url,
             api_key = api_key,
             model = model if model else "gpt-4o",
             temperature = temperature if temperature else 0.5,
@@ -255,12 +166,15 @@ async def get_completion(input_text, output_file, temperature, max_tokens, api_k
 
         # async for chunk in response.astream(input_text):
         answer = []
+        print("\n")
+        print(f"*" * 100)
         for chunk in response.stream(message):
             # AIMessageChunk is an object that contains the content of the message
             # using '.' to access the content of the message not ['content']
-            logger.info(chunk.content, end="", flush=True)
+            print(chunk.content, end="",flush=True)
             answer.append(chunk.content)
-            
+        print("\n")
+        print(f"*" * 100) 
 
         """ 
         # This is the original code for OpenAI API
@@ -288,11 +202,11 @@ async def get_completion(input_text, output_file, temperature, max_tokens, api_k
             default_file = f"completion_{datetime.now(TIME_ZONE).strftime('%Y-%m-%d')}.txt" # Set this as America/Toronto timezone
             write_to_file(default_file, completed_answer)
 
-        return completed_answer
+        return True
     
     except Exception as e:
         logger.error(f"Error in get_completion at line {e.__traceback__.tb_lineno}: {e}")
-        return None
+        return False
 
 ## Main function to run the tool
 async def main():
@@ -302,71 +216,70 @@ async def main():
     # Check if argv[1] is provided and if it is a file we read the context from the file 
     # The context can be a JSON file or a text file
     # then using context with LLM Prompt to generate the completion
-    if len(sys.argv) > 1:
-        file_path = sys.argv[1]
-        if os.path.exists(file_path):
-            if file_path.endswith(".json"):
-                logger.info(f"Reading context from JSON file: {file_path}")
-                with open(file_path, "r") as f:
-                    context = json.load(f)
-                    context = json.dumps(context, indent=4) # using indent 4 for pretty logger.info
-            else:
-                logger.info(f"Reading context from text file: {file_path}")
-                with open(file_path, "r") as f:
-                    context = f.read()
-        else:
-            logger.error(f"File not found: {file_path}")
-            context = None
-
+    if len(sys.argv) > 1 and os.path.exists(sys.argv[1]):
+        context = get_file_content(sys.argv[1])
+        logger.info(f"Context: {context}")
+        
+    # put', '-o', '--temperature', '-t', '--max_tokens', '--api_key', '-a', '--model', '-m', '--base-url', '-u'
     # Check if the version flag is present
-    version = get_version()
-    if version:
-        logger.info(f"{TOOL_NAME} {version}")
-        return  # Exit the script after logger.infoing the version
-    
-    # Check if the help flag is present
-    help = get_help()
-    if help:
-        logger.info(help)
-        return
+    # Parse command-line arguments
+    arguments = generic_set_argv(
+        '--version', '-v', '--help', '-h', '--howto',
+        '--input_text', '-i', '--output', '-o',
+        '--temperature', '-t', '--max_tokens',
+        '--api_key', '-a', '--model', '-m',
+        '--base-url', '-u'
+    )
 
-    # Check if the models flag is present
-    get_models_from_open_ai = get_available_models()
-    if get_models_from_open_ai:
+    if arguments.get('--models'):
+        api_key = arguments.get('--api_key') or arguments.get('-a')
+        if api_key is None or api_key == "":
+            logger.error("API Key is missing")
+            return
+        get_models_from_open_ai = get_available_models(api_key=api_key)
+        if get_models_from_open_ai:
             logger.info("Available models from OpenAI:")
             pprint.pprint(get_models_from_open_ai)
             return
 
-    # Get the API key from the command-line arguments  --api_key or -a
-    api_key = set_api_key()
-    if not api_key:
-        logger.error("API Key is missing. Please provide it using '--api_key' or '-a'.")
+    # Check if the version flag is present
+    if arguments.get('--version') or arguments.get('-v'):
+        print(f"{TOOL_NAME} version: {VERSION}")
+        logger.info(f"{TOOL_NAME} version: {VERSION}")
         return
     
-
-    # Get the input text from the command-line arguments --input_text or -i
-    input_text = get_input()
+    # Check if the help flag is present
+    if arguments.get('--help') or arguments.get('-h') or arguments.get('--howto'):
+        help_message = get_help()
+        print(help_message)
+        logger.info(help_message)
+        return
+    
+    # Check for input text
+    input_text = arguments.get('--input_text') or arguments.get('-i')
     if not input_text:
-        logger.error("Input text is missing. Please provide it using '--input_text' or '-i'.")
-        return
+        input_text = get_input()
     
-
+    # Call get_completion asynchronously
     completion = await get_completion(
-        input_text = input_text,
-        output_file = get_output(),
-        temperature = set_temperature(),
-        max_tokens = set_max_tokens(),
-        api_key = api_key,
-        model = set_model(),
-        context = context
-        )
-    
+        input_text=input_text,
+        output_file=arguments.get('--output') or arguments.get('-o'),
+        base_url=arguments.get('--base-url') or arguments.get('-u'),
+        temperature=arguments.get('--temperature') or arguments.get('-t'),
+        max_tokens=arguments.get('--max_tokens'),
+        api_key=arguments.get('--api_key') or arguments.get('-a'),
+        model=arguments.get('--model') or arguments.get('-m'), # if model is not provided, use gpt-4o
+        context=context
+    )
+
     if completion:
-        logger.info(f"\n\nCompletion generated successfully:\n\n")
-    
+        logger.info("Completion generated successfully.")
+        return
+
+
 
 if __name__ == '__main__':
     # Need to using asyncio.run() to run the async function
     # We will using async for stream of Langchain for future development
     # with API request Response as streamingResponse.
-    asyncio.run(main())
+    asyncio.run(main()) 
