@@ -1,4 +1,4 @@
-API_KEY="YOUR_API_KEY"
+API_KEY="...."  # Replace with your API key
 INPUT="Please summarize the key points from the following text:"
 
 # Run the Python script with the desired arguments
