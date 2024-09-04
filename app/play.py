@@ -303,11 +303,9 @@ async def main():
         model = set_model(),
         context = context
         )
-
+    
     if completion:
-        print(f"Completion: {completion}")
-    else:
-        logger.error("Failed to generate completion.")
+        print(f"\n\nCompletion generated successfully:\n\n")
     
 
 if __name__ == '__main__':

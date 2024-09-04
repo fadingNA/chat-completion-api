@@ -4,6 +4,10 @@ The Chat Completion API is a command-line tool that makes it easy to interact wi
 
 References [Langchain Document](https://api.python.langchain.com/en/latest/llms/langchain_openai.llms.base.OpenAI.html)
 
+## Example of Usage
+
+
+
 
 ## Table of Contributors
 
@@ -26,7 +30,7 @@ Langchain is a Python or Javascript library that provide a flexibility to intera
 
 ## Features
 
-- Easy-to-use CLI for the OpenAI Chat Completion API
+- Easy-to-use CLI for the ChatOpenAI Completion API from Langchain
 - Supports various models, temperature settings, and maximum token limits
 - Outputs to a specified file or a default file
 - Includes error handling and logging
@@ -83,6 +87,7 @@ Langchain is a Python or Javascript library that provide a flexibility to intera
 
 - Python 3.7+
 - An OpenAI API key
+
 
 # License
 This project is licensed under the MIT License - see the [LICENSE](https://github.com/fadingNA/chat-completion-api/blob/main/LICENSE) file for details.
