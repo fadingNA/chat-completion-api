@@ -1,0 +1,2 @@
+2024-09-03 22:48:49:
+The derivative of a function measures how that function changes as the values of its input change. In calculus, the derivative of x^2, denoted as d/dx[x^2] or simply (x^2)', is found using the power

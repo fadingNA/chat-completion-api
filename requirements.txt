@@ -1,4 +1,7 @@
 requests
 pytz
-openai
-langchain-openai
+openai  
+langchain-openai  
+tiktoken 
+langchain 
+langsmith  
