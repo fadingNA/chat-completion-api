@@ -13,7 +13,16 @@ References [Langchain Document](https://api.python.langchain.com/en/latest/llms/
 
 ## Overview
 
-This tool allows you to interact with the OpenAI Chat Completion API via a command-line interface (CLI). You can provide input text, specify a model, and configure other parameters to generate chat completions.
+This tool allows you to interact with the ChatOpenAPI from Langchain via a command-line interface (CLI). You can provide input text, specify a model, and configure other parameters to generate chat completions.
+
+Langchain is a Python or Javascript library that provide a flexibility to interact with OpenAI API. It allows you to generate completions for various tasks, such as chat, code, and text generation. You can use Langchain to build AI-powered applications, automate tasks, and enhance your projects with AI capabilities.
+
+- Embedding: Embedding is a process of converting text into a numerical representation. It is a crucial step in natural language processing (NLP) tasks, such as text classification, sentiment analysis, and named entity recognition. Embeddings capture the semantic meaning of words and sentences, enabling machine learning models to understand and process text data.
+
+- Vectorization: Vectorization is a process of converting text data into a numerical representation. It is a fundamental step in natural language processing (NLP) tasks, such as text classification, sentiment analysis, and named entity recognition. Vectorization transforms text data into a format that machine learning models can process and analyze.
+
+- RAG: Retrieval-Augmented Generation (RAG) is a model architecture that combines retrieval and generation to improve the quality of text generation tasks. RAG leverages a retriever to retrieve relevant information from a large corpus of text and a generator to generate responses based on the retrieved information. This approach enables the model to generate more accurate and contextually relevant responses.
+
 
 ## Features
 
@@ -34,13 +43,14 @@ This tool allows you to interact with the OpenAI Chat Completion API via a comma
 
 ## Usage
   ```bash
-  python3 play.py --api_key sk_xxx \
-   -i "Tell me about directional derivatives" \
+  python3 play.py ../examples/sample2.json --api_key sk_xxx \
+  # using 2 argv[0] and argv[1] for run file and source file
+   -i "Tell me about directional derivatives" \ # input text
    --temperature 0.7 \
    --max_tokens 150 \
    --model gpt-4 \ # gpt-4o or gpt-4 
    --output_file output.txt \
-   --source 'file localtion' 
+   
   ```
 
 
