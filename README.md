@@ -1,11 +1,15 @@
-# Chat Completion API
+# chat-minal
 
-The Chat Completion API is a command-line tool that makes it easy to interact with the OpenAI Chat Completion API using Langchain. This tool allows you to send text prompts and receive AI-generated responses directly from the command line. You can customize the model, set parameters like temperature and token limits, and save the output to a file. 
+The chat-minal is a command-line tool work on terminal that makes it easy to interact with the OpenAI Chat Completion API using Langchain. This tool allows you to send text prompts and receive AI-generated responses directly from the command line. You can customize the model, set parameters like temperature and token limits, and save the output to a file. 
 
 References [Langchain Document](https://api.python.langchain.com/en/latest/llms/langchain_openai.llms.base.OpenAI.html)
 
 ## Example of Usage
 
+<img src="assets/code_reviews.png" alt="Chat Completion Tool Screenshot" width="500" height="300">
+<img src="assets/convert_json_tocsv.png" alt="Chat Completion Tool Screenshot" width="500" height="300">
+<img src="assets/generate_markdown.png" alt="Chat Completion Tool Screenshot" width="500" height="300">
+<img src="assets/summarize_text.png" alt="Chat Completion Tool Screenshot" width="500" height="300">
 
 
 
