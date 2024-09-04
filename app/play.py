@@ -112,7 +112,7 @@ def get_available_models():
     except Exception as e:
         logger.error(f"Error in get_available_models at line {e.__traceback__.tb_lineno}: {e}")
         return None
-    
+
 ## ADDITIONAL FUNCTIONS TO Set the temperature, max_tokens, api_key, and model
 def set_temperature():
     try:
@@ -173,7 +173,7 @@ def set_model():
 
 ## Ollama API to get Completion
 
-async def get_completion(input_text, output_file, temperature, max_tokens, api_key, model):
+async def get_completion(input_text, output_file, temperature, max_tokens, api_key, model, context = None):
     try:
         if api_key is None:
             raise ValueError("API Key is missing")
@@ -185,6 +185,7 @@ async def get_completion(input_text, output_file, temperature, max_tokens, api_k
         print(f"Temperature: {temperature}")
         print(f"Max Tokens: {max_tokens}")
         print(f"Input Text: {input_text}")
+        print(f"Cotext: {context}")
 
         response = LangChainOpenAI(
             base_url = set_base_url(),
@@ -198,7 +199,8 @@ async def get_completion(input_text, output_file, temperature, max_tokens, api_k
         message = [
             (
                 "system",
-                "You are a helpful assistant with the general knowledge of a human mind. please provide at least 3 sentences of context to generate a completion.",
+                f"You are a helpful assistant with the general knowledge of a human mind. please provide at least 3 sentences of context to generate a completion.
+                {context}" if context else "You are a helpful assistant with the general knowledge of a human mind. please provide at least 3 sentences of context to generate a completion.",
             ),
             (
                 "human", f"{input_text}"
@@ -248,7 +250,19 @@ async def get_completion(input_text, output_file, temperature, max_tokens, api_k
 
 ## Main function to run the tool
 async def main():
+    # Check for file arguments
+    context = None
+    if len(sys.argv) > 1:
+        file_path = sys.argv[1]
+        if os.path.exists(file_path):
+            with open(file_path, "r") as f:
+                context = f.read()
+        else:
+            logger.error(f"File not found: {file_path}")
+        return
+
     # Check if the version flag is present
+
     version = get_version()
     if version:
         print(f"{TOOL_NAME} {version}")
@@ -275,13 +289,15 @@ async def main():
         logger.error("Input text is missing. Please provide it using '--input_text' or '-i'.")
         return
     
+
     completion = await get_completion(
         input_text = input_text,
         output_file = get_output(),
         temperature = set_temperature(),
         max_tokens = set_max_tokens(),
         api_key = api_key,
-        model = set_model()
+        model = set_model(),
+        context = context
         )
 
     if completion:
