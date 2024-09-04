@@ -100,3 +100,59 @@ Please make sure to update tests as appropriate.
 ## License
 
 [MIT](https://choosealicense.com/licenses/mit/)
+2024-09-03 23:45:03:
+Sure, here is a basic template for the `readme.md` file. You can add additional information as required.
+
+```markdown
+# Chat Completion Tool
+
+A simple command-line interface (CLI) tool that uses OpenAI’s language model to generate text completions.
+
+## Prerequisites
+
+- Python 3.8+
+- An OpenAI account and API key
+
+## Installation
+
+1. Clone the repository:
+    ```
+    git clone https://github.com/{your-github-username}/chat-completion-tool.git
+    ```
+2. Install the required packages:
+    ```
+    pip install -r requirements.txt
+    ```
+
+## Usage
+
+```
+python app.py [options]
+```
+
+### Options:
+
+- `-h, --help, --howto`: Show help message
+- `-v, --version`: Show the version of the tool
+- `--input`: Input text to generate completion
+- `--output`: Output file to save the generated completion
+- `--temperature`: Temperature for the completion (default: 0.5)
+- `--max_tokens`: Maximum tokens for the completion (default: 100)
+- `--api_key`: OpenAI API Key
+- `--model`: Model for the completion (default: gpt-4o)
+
+## Example
+
+```
+python app.py --input "What is the capital of Canada?" --api_key your_api_key
+```
+
+## License
+
+This project is licensed under the terms of the MIT license.
+
+## Contributing
+
+Please read `CONTRIBUTING.md` for details on our code of conduct, and the process for submitting pull requests to us.
+```
+You would replace `{your-github-username}` with your actual GitHub username and replace `your_api_key` with your actual OpenAI API key.
