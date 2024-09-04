@@ -38,7 +38,7 @@ This tool allows you to interact with the OpenAI Chat Completion API via a comma
    -i "Tell me about directional derivatives" \
    --temperature 0.7 \
    --max_tokens 150 \
-   --model gpt-3.5-turbo-instruct \ # 3.5 for now will change to use 4 and 4o later
+   --model gpt-4 \ # gpt-4o or gpt-4
    --output_file output.txt 
   ```
 
