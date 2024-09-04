@@ -38,9 +38,41 @@ This tool allows you to interact with the OpenAI Chat Completion API via a comma
    -i "Tell me about directional derivatives" \
    --temperature 0.7 \
    --max_tokens 150 \
-   --model gpt-4 \ # gpt-4o or gpt-4
-   --output_file output.txt 
+   --model gpt-4 \ # gpt-4o or gpt-4 
+   --output_file output.txt \
+   --source 'file localtion' 
   ```
+
+
+## Options
+
+- `-h, --help, --howto`: Show the help message.
+- `-v, --version`: Show the version of the tool.
+- `--input_text, -i`: Input text to generate completion.
+- `--output, -o`: Output file to save the generated completion.
+- `--temperature, -t`: Temperature for the completion.
+- `--max_tokens`: Maximum tokens for the completion.
+- `--api_key, -a`: OpenAI API Key.
+- `--model, -m`: Model for the completion.
+
+## Functions
+
+- `get_version()`: Get the version of the tool.
+- `get_help()`: Get the help message.
+- `get_input()`: Get the input text from command line argument.
+- `get_output()`: Get the output file path from command line argument.
+- `get_available_models()`: Retrieve the list of available models from OpenAI.
+- `set_temperature()`: Set the temperature for the completion.
+- `set_max_tokens()`: Set the maximum tokens for the completion.
+- `set_api_key()`: Retrieve the API key from command line argument.
+- `set_model()`: Retrieve the model from command line argument.
+- `get_source()`: Get the source file path from command line argument.
+- `get_completion()`: Get the chat completion from OpenAI API.
+
+## Requirements
+
+- Python 3.7+
+- An OpenAI API key
 
 # License
 This project is licensed under the MIT License - see the [LICENSE](https://github.com/fadingNA/chat-completion-api/blob/main/LICENSE) file for details.
