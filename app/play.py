@@ -39,7 +39,6 @@ def get_help():
     str: help message
     """
     try:
-        print(f"comehere")
         return f"""
             {TOOL_NAME} - A simple CLI tool to do Chat Completion from OpenAI
 
@@ -139,10 +138,10 @@ async def get_completion(input_text, output_file, base_url, temperature, max_tok
             raise ValueError("Input text is missing")
 
         # Debugging the input parameters
-        logger.info(f"Model: {model}")
-        logger.info(f"Temperature: {temperature}")
-        logger.info(f"Max Tokens: {max_tokens}")
-        logger.info(f"Input Text: {input_text}")
+        logger.info(f"Model: {model if model is not None else 'The model without provide on the command line we will use gpt-4o'}")
+        logger.info(f"Temperature: {temperature if temperature else f'{0.5} (default)'}")
+        logger.info(f"Max Tokens: {max_tokens if max_tokens else f'{100} (default)'}")
+        logger.info(f"Input Text: {input_text if input_text else 'No input text provided'}")
         logger.info(f"Cotext: {context}")
 
         response = LangChainOpenAI(
@@ -166,7 +165,6 @@ async def get_completion(input_text, output_file, base_url, temperature, max_tok
 
         # async for chunk in response.astream(input_text):
         answer = []
-        print("\n")
         print(f"*" * 100)
         for chunk in response.stream(message):
             # AIMessageChunk is an object that contains the content of the message
@@ -211,18 +209,20 @@ async def get_completion(input_text, output_file, base_url, temperature, max_tok
 ## Main function to run the tool
 async def main():
     # Check for file arguments
+
+    if len(sys.argv) == 1:
+        print(f"Please provide a file as the first argument. follwing by the command line arguments you can use -h or --help to see the help message")
+        return
     context = None
 
     # Check if argv[1] is provided and if it is a file we read the context from the file 
     # The context can be a JSON file or a text file
     # then using context with LLM Prompt to generate the completion
+    
     if len(sys.argv) > 1 and os.path.exists(sys.argv[1]):
         context = get_file_content(sys.argv[1])
-        logger.info(f"Context: {context}")
-        
-    # put', '-o', '--temperature', '-t', '--max_tokens', '--api_key', '-a', '--model', '-m', '--base-url', '-u'
-    # Check if the version flag is present
-    # Parse command-line arguments
+        #logger.info(f"Context: {context}")
+    
     arguments = generic_set_argv(
         '--version', '-v', '--help', '-h', '--howto',
         '--input_text', '-i', '--output', '-o',
@@ -230,6 +230,11 @@ async def main():
         '--api_key', '-a', '--model', '-m',
         '--base-url', '-u'
     )
+ 
+        
+    # put', '-o', '--temperature', '-t', '--max_tokens', '--api_key', '-a', '--model', '-m', '--base-url', '-u'
+    # Check if the version flag is present
+    # Parse command-line arguments
 
     if arguments.get('--models'):
         api_key = arguments.get('--api_key') or arguments.get('-a')
@@ -252,7 +257,7 @@ async def main():
     if arguments.get('--help') or arguments.get('-h') or arguments.get('--howto'):
         help_message = get_help()
         print(help_message)
-        logger.info(help_message)
+        #logger.info(help_message)
         return
     
     # Check for input text

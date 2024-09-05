@@ -1,14 +1,8 @@
 from imports import *
-
-
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-
 from datetime import datetime
 
-
 logger = setup_logging()
-
 
 # Import necessary modules
 
@@ -63,19 +57,21 @@ def generic_set_argv(*args):
     argv (list): The command line arguments to set.
     """
     parsed_args = {}
+    if args is None:
+        return parsed_args
+    
     for key in args:
         try:
             index = sys.argv.index(key)
-            print(f"Index: {index}")
+            #print(f"Index: {index}")
             if len(sys.argv) > index + 1 and not sys.argv[index + 1].startswith("-"):
                 parsed_args[key] = sys.argv[index + 1]
             else:
                 parsed_args[key] = True
         except ValueError:
-            print(f"Error: {key} must be an integer.")
+            #print(f"Error: {key} must be an integer.")
             parsed_args[key] = None
             #sys.exit(1)
-    logger.info(f"Command line arguments: {parsed_args}")
     return parsed_args
 
 def get_file_content(file_path):
