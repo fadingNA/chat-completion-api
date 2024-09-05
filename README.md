@@ -38,6 +38,8 @@ Langchain is a Python or Javascript library that provide a flexibility to intera
 - Supports various models, temperature settings, and maximum token limits
 - Outputs to a specified file or a default file
 - Includes error handling and logging
+- Streaming Response
+- Selecting Models
 
 ## Installation
 
