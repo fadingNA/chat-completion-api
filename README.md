@@ -4,6 +4,10 @@ The chat-minal is a command-line tool work on terminal that makes it easy to int
 
 References [Langchain Document](https://api.python.langchain.com/en/latest/llms/langchain_openai.llms.base.OpenAI.html)
 
+## Demo walkthrough the chatminal
+
+Demo Link [chat-minal tutorial](https://github.com/fadingNA/chat-completion-api)
+
 ## Example of Usage
 
 <img src="assets/code_reviews.png" alt="Chat Completion Tool Screenshot" width="500" height="300">
