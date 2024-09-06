@@ -1,3 +1,6 @@
+from utils import *
+from imports import *
+from config import *
 import sys
 import os
 import json
@@ -7,9 +10,6 @@ import json
 # THIS TELLS PYTHON TO LOOK FOR THE CONFIG FILE IN THE PARENT DIRECTORY
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from config import *
-from imports import *
-from utils import *
 
 # Setup logger
 logger = setup_logging()
@@ -17,7 +17,9 @@ logger = setup_logging()
 # Set the timezone
 TIME_ZONE = pytz.timezone('America/Toronto')
 
-## ADDITIONAL FUNCTIONS TO GET THE VERSION AND HELP
+# ADDITIONAL FUNCTIONS TO GET THE VERSION AND HELP
+
+
 def get_version():
     """
     Get Version for cli tool by using -v or --version
@@ -31,6 +33,7 @@ def get_version():
     except Exception as e:
         logger.error(f"Error in get_version at line {e.__traceback__.tb_lineno}: {e}")
         return None
+
 
 def get_help():
     """
@@ -48,17 +51,18 @@ def get_help():
             Options:
             -h, --help, --howto     Show this help message
             -v, --version           Show the version of the tool
-            --input                 Input text to generate completion
-            --output                Output file to save the generated completion
-            --temperature           Temperature for the completion
+            --input_text, -i                 Input text to generate completion
+            --output, -o                Output file to save the generated completion
+            --temperature, -t           Temperature for the completion
             --max_tokens            Maximum tokens for the completion
-            --api_key               OpenAI API Key
-            --model                 Model for the completion
+            --api_key, -a               OpenAI API Key
+            --model, -m                 Model for the completion
             """
-    
+
     except Exception as e:
         logger.error(f"Error in get_help at line {e.__traceback__.tb_lineno}: {e}")
         return None
+
 
 def get_input():
     try:
@@ -68,6 +72,7 @@ def get_input():
         logger.error(f"Error in get_input at line {e.__traceback__.tb_lineno}: {e}")
         return None
 
+
 def get_output():
     try:
         if '--output' in sys.argv or '-o' in sys.argv:
@@ -75,6 +80,7 @@ def get_output():
     except Exception as e:
         logger.error(f"Error in get_input at line {e.__traceback__.tb_lineno}: {e}")
         return None
+
 
 def get_available_models(api_key=None):
     """
@@ -85,7 +91,8 @@ def get_available_models(api_key=None):
     """
     try:
         if '--models' in sys.argv:
-            api_key = api_key or sys.argv[sys.argv.index('--api_key') + 1] if '--api_key' in sys.argv else sys.argv[sys.argv.index('-a') + 1]
+            api_key = api_key or sys.argv[sys.argv.index(
+                '--api_key') + 1] if '--api_key' in sys.argv else sys.argv[sys.argv.index('-a') + 1]
             if api_key is None:
                 raise Exception("API Key is missing")
 
@@ -108,9 +115,10 @@ def get_available_models(api_key=None):
         logger.error(f"Error in get_available_models at line {e.__traceback__.tb_lineno}: {e}")
         return None
 
-## ADDITIONAL FUNCTIONS TO Set the temperature, max_tokens, api_key, and model
-    
-async def get_completion(input_text, output_file, base_url, temperature, max_tokens, api_key, model, context = None):
+# ADDITIONAL FUNCTIONS TO Set the temperature, max_tokens, api_key, and model
+
+
+async def get_completion(input_text, output_file, base_url, temperature, max_tokens, api_key, model, context=None):
     """
     Call the Langchain ChatOpenAI Completion API to generate the completion.
 
@@ -122,13 +130,12 @@ async def get_completion(input_text, output_file, base_url, temperature, max_tok
     api_key (str): The OpenAI API key.
     model (str): The model for the completion.
     context (str): The context for the completion.
-    
+
     Returns:
     str: The generated completion or None if an error occurs.
 
     """
-    
-    
+
     try:
         if api_key is None:
             raise ValueError("API Key is missing")
@@ -145,11 +152,11 @@ async def get_completion(input_text, output_file, base_url, temperature, max_tok
         logger.info(f"Cotext: {context}")
 
         response = LangChainOpenAI(
-            base_url = base_url,
-            api_key = api_key,
-            model = model if model else "gpt-4o",
-            temperature = temperature if temperature else 0.5,
-            max_tokens = max_tokens if max_tokens else 100,
+            base_url=base_url,
+            api_key=api_key,
+            model=model if model else "gpt-4o",
+            temperature=temperature if temperature else 0.5,
+            max_tokens=max_tokens if max_tokens else 100,
             max_retries=2,
         )
 
@@ -169,10 +176,10 @@ async def get_completion(input_text, output_file, base_url, temperature, max_tok
         for chunk in response.stream(message):
             # AIMessageChunk is an object that contains the content of the message
             # using '.' to access the content of the message not ['content']
-            print(chunk.content, end="",flush=True)
+            print(chunk.content, end="", flush=True)
             answer.append(chunk.content)
         print("\n")
-        print(f"*" * 100) 
+        print(f"*" * 100)
 
         """ 
         # This is the original code for OpenAI API
@@ -189,24 +196,26 @@ async def get_completion(input_text, output_file, base_url, temperature, max_tok
             if chunk.choices[0].delta.content is not None:
                 logger.info(chunk.choices[0].delta.content, end="")
         """
-        
+
         logger.info("\n\nCompletion generated successfully.")
         completed_answer = "".join(answer)
         if output_file:
-        # Write to the specified output file
+            # Write to the specified output file
             write_to_file(output_file, completed_answer)
         else:
             # Define the default file name
-            default_file = f"completion_{datetime.now(TIME_ZONE).strftime('%Y-%m-%d')}.txt" # Set this as America/Toronto timezone
+            default_file = f"completion_{datetime.now(TIME_ZONE).strftime('%Y-%m-%d')}.txt"  # Set this as America/Toronto timezone
             write_to_file(default_file, completed_answer)
 
         return True
-    
+
     except Exception as e:
         logger.error(f"Error in get_completion at line {e.__traceback__.tb_lineno}: {e}")
         return False
 
-## Main function to run the tool
+# Main function to run the tool
+
+
 async def main():
     # Check for file arguments
 
@@ -215,14 +224,25 @@ async def main():
         return
     context = None
 
-    # Check if argv[1] is provided and if it is a file we read the context from the file 
+    if len(sys.argv) > 1:
+        ACCEPTED_ARGS = ['--input_text', '-i', '--output', '-o', '--temperature', '-t', '--max_tokens',
+                         '--api_key', '-a', '--model', '-m', '--base-url', '-u', '-v', '--version', '-h', '--help', '--howto']
+        for args in sys.argv:
+            # first argument is the file name
+            if args == sys.argv[0]:
+                continue
+            if args not in ACCEPTED_ARGS:
+                print(f"Invalid argument: {args}")
+                print(f"Please use -h or --help to see the help message")
+                return
+    # Check if argv[1] is provided and if it is a file we read the context from the file
     # The context can be a JSON file or a text file
     # then using context with LLM Prompt to generate the completion
-    
+
     if len(sys.argv) > 1 and os.path.exists(sys.argv[1]):
         context = get_file_content(sys.argv[1])
-        #logger.info(f"Context: {context}")
-    
+        # logger.info(f"Context: {context}")
+
     arguments = generic_set_argv(
         '--version', '-v', '--help', '-h', '--howto',
         '--input_text', '-i', '--output', '-o',
@@ -230,8 +250,7 @@ async def main():
         '--api_key', '-a', '--model', '-m',
         '--base-url', '-u'
     )
- 
-        
+
     # put', '-o', '--temperature', '-t', '--max_tokens', '--api_key', '-a', '--model', '-m', '--base-url', '-u'
     # Check if the version flag is present
     # Parse command-line arguments
@@ -252,19 +271,19 @@ async def main():
         print(f"{TOOL_NAME} version: {VERSION}")
         logger.info(f"{TOOL_NAME} version: {VERSION}")
         return
-    
+
     # Check if the help flag is present
     if arguments.get('--help') or arguments.get('-h') or arguments.get('--howto'):
         help_message = get_help()
         print(help_message)
-        #logger.info(help_message)
+        # logger.info(help_message)
         return
-    
+
     # Check for input text
     input_text = arguments.get('--input_text') or arguments.get('-i')
     if not input_text:
         input_text = get_input()
-    
+
     # Call get_completion asynchronously
     completion = await get_completion(
         input_text=input_text,
@@ -273,7 +292,8 @@ async def main():
         temperature=arguments.get('--temperature') or arguments.get('-t'),
         max_tokens=arguments.get('--max_tokens'),
         api_key=arguments.get('--api_key') or arguments.get('-a'),
-        model=arguments.get('--model') or arguments.get('-m'), # if model is not provided, use gpt-4o
+        # if model is not provided, use gpt-4o
+        model=arguments.get('--model') or arguments.get('-m'),
         context=context
     )
 
@@ -282,9 +302,8 @@ async def main():
         return
 
 
-
 if __name__ == '__main__':
     # Need to using asyncio.run() to run the async function
     # We will using async for stream of Langchain for future development
     # with API request Response as streamingResponse.
-    asyncio.run(main()) 
+    asyncio.run(main())
