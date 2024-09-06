@@ -6,7 +6,7 @@ References [Langchain Document](https://api.python.langchain.com/en/latest/llms/
 
 ## Demo walkthrough the chatminal
 
-Demo Link [chat-minal tutorial](https://github.com/fadingNA/chat-completion-api)
+Demo Link [chat-minal tutorial](https://youtu.be/NT175YPU-FY)
 
 ## Example of Usage
 
