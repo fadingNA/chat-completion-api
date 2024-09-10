@@ -4,4 +4,6 @@ openai
 langchain-openai  
 tiktoken 
 langchain 
-langsmith  
+langsmith
+langchain-community 
+langchain-core 
