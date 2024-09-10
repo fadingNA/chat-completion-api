@@ -1,4 +1,5 @@
 from imports import *
+from config import *
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from datetime import datetime
 
@@ -97,3 +98,40 @@ def get_file_content(file_path):
     except Exception as e:
         logger.error(f"Error reading file {file_path} at line {e.__traceback__.tb_lineno}: {e}")
         return None
+    
+def format_docs(docs):
+    return "\n\n".join(doc.page_content for doc in docs)
+
+
+
+# later on implement credentials we will add user_id for each conversation
+
+
+def get_session_history(session_id):
+    return SQLChatMessageHistory(session_id, "sqlite:///memory.db")
+    
+
+
+def save_chat_history(session_id: str, chat_history: BaseChatMessageHistory):
+    """
+    Save chat history to a JSON file.
+    
+    Args:
+    session_id (str): The session ID for which to save the chat history.
+    chat_history (BaseChatMessageHistory): The chat history to save.
+    """
+    file_path = f"{session_id}_history.json"
+
+    # Convert chat history messages to a serializable format
+    messages = [
+        {"type": "human", "content": message.content} if isinstance(message, HumanMessage) else
+        {"type": "ai", "content": message.content, "metadata": message.response_metadata}
+        for message in chat_history.messages
+    ]
+
+    # Save to JSON file
+    with open(file_path, "w") as file:
+        json.dump(messages, file)
+    print(f"Chat history saved for session {session_id}.")  # Debug print
+
+

@@ -118,7 +118,7 @@ def get_available_models(api_key=None):
 # ADDITIONAL FUNCTIONS TO Set the temperature, max_tokens, api_key, and model
 
 
-async def get_completion(input_text, output_file, base_url, temperature, max_tokens, api_key, model, context=None):
+async def get_completion(input_text, output_file, base_url, temperature, max_tokens, api_key, model, context=None , output=None):
     """
     Call the Langchain ChatOpenAI Completion API to generate the completion.
 
@@ -160,26 +160,38 @@ async def get_completion(input_text, output_file, base_url, temperature, max_tok
             max_retries=2,
         )
 
+        # Get the session history
+        #chat_history.add_user_mesaage(input_text)
+
+        # Create the message template with placeholders
         message = [
-            (
-                "system",
-                f"You are a professional analyst who is working on a different and you will use {context} as context and then provide answer based on user question.",
-            ),
-            (
-                "human", f"{input_text}"
-            )
+            ("system", f"You are a professional analyst working with different contexts. Use the provided context: {context} and respond based on the user question."),
+            MessagesPlaceholder(variable_name="history"),
+            ("human", f"{input_text}")
         ]
+        
+        prompt = ChatPromptTemplate.from_messages(
+            message
+        )
+        chat_history = get_session_history("1")
+        
+
+        runnable = prompt | response
+
+        # Manage message history with RunnableWithMessageHistory
+        with_message_history = RunnableWithMessageHistory(
+            runnable,
+            get_session_history,
+        )
 
         # async for chunk in response.astream(input_text):
+        # Execute the runnable and stream the response
         answer = []
-        print(f"*" * 100)
-        for chunk in response.stream(message):
-            # AIMessageChunk is an object that contains the content of the message
-            # using '.' to access the content of the message not ['content']
+        print("*" * 100)
+        for chunk in with_message_history.stream([HumanMessage(content=input_text)], config={"configurable": {"session_id": "1"}}):
             print(chunk.content, end="", flush=True)
             answer.append(chunk.content)
-        print("\n")
-        print(f"*" * 100)
+        print("\n" + "*" * 100)
 
         """ 
         # This is the original code for OpenAI API
@@ -199,13 +211,22 @@ async def get_completion(input_text, output_file, base_url, temperature, max_tok
 
         logger.info("\n\nCompletion generated successfully.")
         completed_answer = "".join(answer)
-        if output_file:
-            # Write to the specified output file
-            write_to_file(output_file, completed_answer)
+        chat_history = get_session_history("1")
+
+        print("Chat History: ", chat_history.messages)
+
+        save_chat_history(session_id="test1", chat_history=chat_history)
+
+        if output is True:
+            if output_file:
+                # Write to the specified output file
+                write_to_file(output_file, completed_answer)
+            else:
+                # Define the default file name
+                default_file = f"completion_{datetime.now(TIME_ZONE).strftime('%Y-%m-%d')}.txt"  # Set this as America/Toronto timezone
+                write_to_file(default_file, completed_answer)
         else:
-            # Define the default file name
-            default_file = f"completion_{datetime.now(TIME_ZONE).strftime('%Y-%m-%d')}.txt"  # Set this as America/Toronto timezone
-            write_to_file(default_file, completed_answer)
+            logger.info(f"Completion: Done without saving to file")
 
         return True
 
@@ -224,17 +245,7 @@ async def main():
         return
     context = None
 
-    if len(sys.argv) > 1:
-        ACCEPTED_ARGS = ['--input_text', '-i', '--output', '-o', '--temperature', '-t', '--max_tokens',
-                         '--api_key', '-a', '--model', '-m', '--base-url', '-u', '-v', '--version', '-h', '--help', '--howto']
-        for args in sys.argv:
-            # first argument is the file name
-            if args == sys.argv[0]:
-                continue
-            if args not in ACCEPTED_ARGS:
-                print(f"Invalid argument: {args}")
-                print(f"Please use -h or --help to see the help message")
-                return
+    
     # Check if argv[1] is provided and if it is a file we read the context from the file
     # The context can be a JSON file or a text file
     # then using context with LLM Prompt to generate the completion
@@ -284,6 +295,10 @@ async def main():
     if not input_text:
         input_text = get_input()
 
+    is_output = arguments.get('--output') or arguments.get('-o')
+    if not is_output:
+        logger.info("No output file specified. The result will be displayed on the console.")
+
     # Call get_completion asynchronously
     completion = await get_completion(
         input_text=input_text,
@@ -294,7 +309,8 @@ async def main():
         api_key=arguments.get('--api_key') or arguments.get('-a'),
         # if model is not provided, use gpt-4o
         model=arguments.get('--model') or arguments.get('-m'),
-        context=context
+        context=context,
+        output=True
     )
 
     if completion:
