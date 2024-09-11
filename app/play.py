@@ -96,7 +96,6 @@ def get_available_models(api_key=None):
             if api_key is None:
                 raise Exception("API Key is missing")
 
-            logger.info(f"Retrieving available models from OpenAI..")
             # Make a request to OpenAI API
             headers = {
                 "Authorization": f"Bearer {api_key}"
@@ -173,9 +172,8 @@ async def get_completion(input_text, output_file, base_url, temperature, max_tok
         prompt = ChatPromptTemplate.from_messages(
             message
         )
-        chat_history = get_session_history("1")
-        
 
+        # Create Runnable with message LLM | Prompt we can use "|" to combine the two objects
         runnable = prompt | response
 
         # Manage message history with RunnableWithMessageHistory
@@ -188,7 +186,7 @@ async def get_completion(input_text, output_file, base_url, temperature, max_tok
         # Execute the runnable and stream the response
         answer = []
         print("*" * 100)
-        for chunk in with_message_history.stream([HumanMessage(content=input_text)], config={"configurable": {"session_id": "1"}}):
+        for chunk in with_message_history.stream([HumanMessage(content=input_text)], config={"configurable": {"session_id": "test1"}}):
             print(chunk.content, end="", flush=True)
             answer.append(chunk.content)
         print("\n" + "*" * 100)
@@ -211,22 +209,18 @@ async def get_completion(input_text, output_file, base_url, temperature, max_tok
 
         logger.info("\n\nCompletion generated successfully.")
         completed_answer = "".join(answer)
-        chat_history = get_session_history("1")
-
-        print("Chat History: ", chat_history.messages)
+        chat_history = get_session_history("test1")
 
         save_chat_history(session_id="test1", chat_history=chat_history)
+        logger.info(f"The answer is saved to the chat history. with session_id: {chat_history.session_id}")
 
-        if output is True:
-            if output_file:
-                # Write to the specified output file
-                write_to_file(output_file, completed_answer)
-            else:
-                # Define the default file name
-                default_file = f"completion_{datetime.now(TIME_ZONE).strftime('%Y-%m-%d')}.txt"  # Set this as America/Toronto timezone
-                write_to_file(default_file, completed_answer)
+        # Handle file output if specified
+        if output:
+            file_to_write = output_file if output_file else f"""{output}_{datetime.now(TIME_ZONE).strftime('%Y-%m-%d')}.txt"""
+            write_to_file(file_to_write, completed_answer)
+            logger.info(f"Completion saved to {file_to_write}")
         else:
-            logger.info(f"Completion: Done without saving to file")
+            logger.info("Completion done without saving to file")
 
         return True
 
@@ -241,7 +235,8 @@ async def main():
     # Check for file arguments
 
     if len(sys.argv) == 1:
-        print(f"Please provide a file as the first argument. follwing by the command line arguments you can use -h or --help to see the help message")
+        print(f"""Please provide a file as the first argument. follwing by the command line arguments you can use -h or --help to see the help message \n 
+               Or you can use the command line arguments directly without providing a file but with arguments --input_text or -i to provide the input text""") 
         return
     context = None
 
@@ -259,7 +254,8 @@ async def main():
         '--input_text', '-i', '--output', '-o',
         '--temperature', '-t', '--max_tokens',
         '--api_key', '-a', '--model', '-m',
-        '--base-url', '-u'
+        '--base-url', '-u',
+        '--models'
     )
 
     # put', '-o', '--temperature', '-t', '--max_tokens', '--api_key', '-a', '--model', '-m', '--base-url', '-u'
@@ -275,6 +271,9 @@ async def main():
         if get_models_from_open_ai:
             logger.info("Available models from OpenAI:")
             pprint.pprint(get_models_from_open_ai)
+            return
+        else:
+            logger.error("Failed to retrieve models from OpenAI")
             return
 
     # Check if the version flag is present
@@ -295,10 +294,7 @@ async def main():
     if not input_text:
         input_text = get_input()
 
-    is_output = arguments.get('--output') or arguments.get('-o')
-    if not is_output:
-        logger.info("No output file specified. The result will be displayed on the console.")
-
+    
     # Call get_completion asynchronously
     completion = await get_completion(
         input_text=input_text,
@@ -310,7 +306,7 @@ async def main():
         # if model is not provided, use gpt-4o
         model=arguments.get('--model') or arguments.get('-m'),
         context=context,
-        output=True
+        output=arguments.get('--output' or arguments.get('-o'))
     )
 
     if completion:

@@ -111,11 +111,13 @@ def get_session_history(session_id):
     return SQLChatMessageHistory(session_id, "sqlite:///memory.db")
     
 
+import json
+import os
 
 def save_chat_history(session_id: str, chat_history: BaseChatMessageHistory):
     """
-    Save chat history to a JSON file.
-    
+    Save chat history to a JSON file by appending new messages.
+
     Args:
     session_id (str): The session ID for which to save the chat history.
     chat_history (BaseChatMessageHistory): The chat history to save.
@@ -123,15 +125,30 @@ def save_chat_history(session_id: str, chat_history: BaseChatMessageHistory):
     file_path = f"{session_id}_history.json"
 
     # Convert chat history messages to a serializable format
-    messages = [
+    new_messages = [
         {"type": "human", "content": message.content} if isinstance(message, HumanMessage) else
         {"type": "ai", "content": message.content, "metadata": message.response_metadata}
         for message in chat_history.messages
     ]
 
-    # Save to JSON file
+    # Initialize an empty list to hold existing messages
+    combined_messages = []
+
+    # Read existing messages if the file exists
+    if os.path.exists(file_path):
+        with open(file_path, "r") as file:
+            try:
+                combined_messages = json.load(file)  # Load existing messages
+            except json.JSONDecodeError:
+                pass  # In case of an empty or invalid JSON file, ignore the error
+
+    # Append new messages to the existing ones
+    combined_messages.extend(new_messages)
+
+    # Save the combined messages back to the JSON file
     with open(file_path, "w") as file:
-        json.dump(messages, file)
-    print(f"Chat history saved for session {session_id}.")  # Debug print
+        json.dump(combined_messages, file)
+
+    logger.info(f"Chat history appended for session {session_id}.")  # Debug print
 
 
