@@ -216,7 +216,7 @@ async def get_completion(input_text, output_file, base_url, temperature, max_tok
         logger.info(f"The answer is saved to the chat history. with session_id: {chat_history.session_id}")
 
         # Handle file output if specified
-        if output != "":
+        if output_file != "":
             file_to_write = output_file if output_file else f"""{output}_{datetime.now(TIME_ZONE).strftime('%Y-%m-%d')}.txt"""
             write_to_file(file_to_write, completed_answer)
             logger.info(f"Completion saved to {file_to_write}")
@@ -307,7 +307,6 @@ async def main():
         # if model is not provided, use gpt-4o
         model=arguments.get('--model') or arguments.get('-m'),
         context=context,
-        output=arguments.get('--output' or arguments.get('-o'))
     )
 
     if completion:
