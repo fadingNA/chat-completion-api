@@ -10,12 +10,21 @@ Demo Link [chat-minal tutorial](https://youtu.be/NT175YPU-FY)
 
 ## Example of Usage
 
-<img src="assets/code_reviews.png" alt="Chat Completion Tool Screenshot" width="500" height="300">
-<img src="assets/convert_json_tocsv.png" alt="Chat Completion Tool Screenshot" width="500" height="300">
-<img src="assets/generate_markdown.png" alt="Chat Completion Tool Screenshot" width="500" height="300">
-<img src="assets/summarize_text.png" alt="Chat Completion Tool Screenshot" width="500" height="300">
+<center>
 
+![Code Review in Chat Completion Tool](assets/code_reviews.png)
+*Figure 1: Code Review in Chat Completion Tool*
 
+![Convert JSON to CSV](assets/convert_json_tocsv.png)
+*Figure 2: Converting JSON to CSV using the Tool*
+
+![Generate Markdown from Text](assets/generate_markdown.png)
+*Figure 3: Generating Markdown from Text with Ease*
+
+![Summarize Text](assets/summarize_text.png)
+*Figure 4: Summarizing Text in the Chat Completion Tool*
+
+</center>
 
 ## Table of Contributors
 
