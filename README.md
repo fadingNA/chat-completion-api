@@ -78,6 +78,7 @@ Langchain is a Python or Javascript library that provide a flexibility to intera
 - `--max_tokens`: Maximum tokens for the completion.
 - `--api_key, -a`: OpenAI API Key.
 - `--model, -m`: Model for the completion.
+- `--models`: List all available models on OpenAI
 
 ## Functions
 
