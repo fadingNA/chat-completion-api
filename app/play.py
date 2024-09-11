@@ -69,7 +69,7 @@ def get_input():
         # Check if '--input_text' or '-i' is in the command-line arguments
         return sys.argv[sys.argv.index('--input_text') + 1] if '--input_text' in sys.argv else sys.argv[sys.argv.index('-i') + 1]
     except Exception as e:
-        logger.error(f"Error in get_input at line {e.__traceback__.tb_lineno}: {e}")
+        logger.warning(f"Your input text is missing. It will use the default prompt to generate the completion.")
         return None
 
 
@@ -149,6 +149,7 @@ async def get_completion(input_text, output_file, base_url, temperature, max_tok
         logger.info(f"Max Tokens: {max_tokens if max_tokens else f'{100} (default)'}")
         logger.info(f"Input Text: {input_text if input_text else 'No input text provided'}")
         logger.info(f"Cotext: {context}")
+        logger.info(f"Output File: {output_file if output_file else 'No output file provided'}")
 
         response = LangChainOpenAI(
             base_url=base_url,
@@ -215,7 +216,7 @@ async def get_completion(input_text, output_file, base_url, temperature, max_tok
         logger.info(f"The answer is saved to the chat history. with session_id: {chat_history.session_id}")
 
         # Handle file output if specified
-        if output:
+        if output != "":
             file_to_write = output_file if output_file else f"""{output}_{datetime.now(TIME_ZONE).strftime('%Y-%m-%d')}.txt"""
             write_to_file(file_to_write, completed_answer)
             logger.info(f"Completion saved to {file_to_write}")
@@ -297,7 +298,7 @@ async def main():
     
     # Call get_completion asynchronously
     completion = await get_completion(
-        input_text=input_text,
+        input_text=input_text if input_text else "No input text provided please analyze the context",
         output_file=arguments.get('--output') or arguments.get('-o'),
         base_url=arguments.get('--base-url') or arguments.get('-u'),
         temperature=arguments.get('--temperature') or arguments.get('-t'),
