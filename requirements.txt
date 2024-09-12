@@ -7,3 +7,7 @@ langchain
 langsmith
 langchain-community 
 langchain-core 
+langchain 
+pypdf 
+python-docx 
+unstructured

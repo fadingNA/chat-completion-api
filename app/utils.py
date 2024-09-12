@@ -1,5 +1,6 @@
 from imports import *
 from config import *
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from datetime import datetime
 
@@ -68,7 +69,7 @@ def generic_set_argv(*args):
             if len(sys.argv) > index + 1 and not sys.argv[index + 1].startswith("-"):
                 parsed_args[key] = sys.argv[index + 1]
             else:
-                parsed_args[key] = True
+                parsed_args[key] = ""
         except ValueError:
             #print(f"Error: {key} must be an integer.")
             parsed_args[key] = None
@@ -93,7 +94,7 @@ def get_file_content(file_path):
                 return json.dumps(json_content, indent=4)  # Convert JSON to a formatted string
         else:
             logger.info(f"Reading context from text file: {file_path}")
-            with open(file_path, "r") as f:
+            with open(file_path, "r", encoding='utf-8') as f:
                 return f.read()
     except Exception as e:
         logger.error(f"Error reading file {file_path} at line {e.__traceback__.tb_lineno}: {e}")
@@ -102,17 +103,34 @@ def get_file_content(file_path):
 def format_docs(docs):
     return "\n\n".join(doc.page_content for doc in docs)
 
+def load_pdf(pdf_path):
+    try:
+        loader = UnstructuredPDFLoader(pdf_path, mode="elements", strategy="fast")
+        docs = loader.load()
+        return docs
+    except Exception as e:
+        logger.error(f"Error reading file {pdf_path} at line {e.__traceback__.tb_lineno}: {e}")
+        return None
 
-
+def read_file_docx(docx):
+    try:
+        if docx.endswith(".docx"):
+            logger.info(f"Reading context from DOCX file: {docx}")
+            loader = UnstructuredWordDocumentLoader(docx, mode="elements",  strategy="fast" )
+            docs = loader.load()
+            return docs
+        else:
+            logger.warning(f"Unsupported file format: {docx}")
+            return None
+    except Exception as e:
+        logger.error(f"Error reading file {docx} at line {e.__traceback__.tb_lineno}: {e}")
+        return None
 # later on implement credentials we will add user_id for each conversation
-
 
 def get_session_history(session_id):
     return SQLChatMessageHistory(session_id, "sqlite:///memory.db")
     
 
-import json
-import os
 
 def save_chat_history(session_id: str, chat_history: BaseChatMessageHistory):
     """

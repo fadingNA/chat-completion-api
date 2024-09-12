@@ -31,7 +31,8 @@ def get_version():
         if '--version' in sys.argv or '-v' in sys.argv:
             return VERSION
     except Exception as e:
-        logger.error(f"Error in get_version at line {e.__traceback__.tb_lineno}: {e}")
+        logger.error(
+            f"Error in get_version at line {e.__traceback__.tb_lineno}: {e}")
         return None
 
 
@@ -57,10 +58,12 @@ def get_help():
             --max_tokens            Maximum tokens for the completion
             --api_key, -a               OpenAI API Key
             --model, -m                 Model for the completion
+            --select_choice, -sc        Select the choice to perform the task
             """
 
     except Exception as e:
-        logger.error(f"Error in get_help at line {e.__traceback__.tb_lineno}: {e}")
+        logger.error(
+            f"Error in get_help at line {e.__traceback__.tb_lineno}: {e}")
         return None
 
 
@@ -69,7 +72,8 @@ def get_input():
         # Check if '--input_text' or '-i' is in the command-line arguments
         return sys.argv[sys.argv.index('--input_text') + 1] if '--input_text' in sys.argv else sys.argv[sys.argv.index('-i') + 1]
     except Exception as e:
-        logger.warning(f"Your input text is missing. It will use the default prompt to generate the completion.")
+        logger.warning(
+            f"Your input text is missing. It will use the default prompt to generate the completion.")
         return None
 
 
@@ -78,7 +82,8 @@ def get_output():
         if '--output' in sys.argv or '-o' in sys.argv:
             return sys.argv[sys.argv.index('--output') + 1]
     except Exception as e:
-        logger.error(f"Error in get_input at line {e.__traceback__.tb_lineno}: {e}")
+        logger.error(
+            f"Error in get_input at line {e.__traceback__.tb_lineno}: {e}")
         return None
 
 
@@ -107,17 +112,19 @@ def get_available_models(api_key=None):
                 logger.info("Available models retrieved successfully.")
                 return response.json()
             else:
-                logger.error(f"Failed to retrieve models: {response.status_code} - {response.text}")
+                logger.error(
+                    f"Failed to retrieve models: {response.status_code} - {response.text}")
                 return None
 
     except Exception as e:
-        logger.error(f"Error in get_available_models at line {e.__traceback__.tb_lineno}: {e}")
+        logger.error(
+            f"Error in get_available_models at line {e.__traceback__.tb_lineno}: {e}")
         return None
 
 # ADDITIONAL FUNCTIONS TO Set the temperature, max_tokens, api_key, and model
 
 
-async def get_completion(input_text, output_file, base_url, temperature, max_tokens, api_key, model, context=None , output=None):
+async def get_completion(input_text, output_file, base_url, temperature, max_tokens, api_key, model, context=None, output=None):
     """
     Call the Langchain ChatOpenAI Completion API to generate the completion.
 
@@ -144,12 +151,18 @@ async def get_completion(input_text, output_file, base_url, temperature, max_tok
             raise ValueError("Input text is missing")
 
         # Debugging the input parameters
-        logger.info(f"Model: {model if model is not None else 'The model without provide on the command line we will use gpt-4o'}")
-        logger.info(f"Temperature: {temperature if temperature else f'{0.5} (default)'}")
-        logger.info(f"Max Tokens: {max_tokens if max_tokens else f'{100} (default)'}")
-        logger.info(f"Input Text: {input_text if input_text else 'No input text provided'}")
-        logger.info(f"Cotext: {context}")
-        logger.info(f"Output File: {output_file if output_file else 'No output file provided'}")
+        logger.info(
+            f"Model: {model if model is not None else 'The model without provide on the command line we will use gpt-4o'}")
+        logger.info(
+            f"Temperature: {temperature if temperature else f'{0.5} (default)'}")
+        logger.info(
+            f"Max Tokens: {max_tokens if max_tokens else f'{100} (default)'}")
+        logger.info(
+            f"Input Text: {input_text if input_text else 'No input text provided'}")
+        # Display the first 30 characters of the context
+        logger.info(f"Cotext: {context[:30]}")
+        logger.info(
+            f"Output File: {output_file if output_file else 'No output file provided'}")
 
         response = LangChainOpenAI(
             base_url=base_url,
@@ -161,15 +174,15 @@ async def get_completion(input_text, output_file, base_url, temperature, max_tok
         )
 
         # Get the session history
-        #chat_history.add_user_mesaage(input_text)
 
         # Create the message template with placeholders
         message = [
-            ("system", f"You are a professional analyst working with different contexts. Use the provided context: {context} and respond based on the user question."),
+            ("system",
+             f"You are a professional analyst working with different contexts. Use the provided context: {context} and respond based on the user question."),
             MessagesPlaceholder(variable_name="history"),
             ("human", f"{input_text}")
         ]
-        
+
         prompt = ChatPromptTemplate.from_messages(
             message
         )
@@ -184,40 +197,29 @@ async def get_completion(input_text, output_file, base_url, temperature, max_tok
         )
 
         # async for chunk in response.astream(input_text):
-        # Execute the runnable and stream the response
         answer = []
-        print("*" * 100)
+        print("\n" + "*" * 100)
         for chunk in with_message_history.stream([HumanMessage(content=input_text)], config={"configurable": {"session_id": "test1"}}):
             print(chunk.content, end="", flush=True)
             answer.append(chunk.content)
         print("\n" + "*" * 100)
-
-        """ 
-        # This is the original code for OpenAI API
-        response = client.chat.completions.create(
-            model = model if model else "gpt-4o", # if user does not provide model, use gpt-4o
-            messages=[
-                {"role": "user", "content": input_text}
-            ],
-            stream = True,
-            temperature = temperature if temperature else 0.5,
-            max_tokens = max_tokens if max_tokens else 100,
-        )
-        for chunk in response:
-            if chunk.choices[0].delta.content is not None:
-                logger.info(chunk.choices[0].delta.content, end="")
-        """
 
         logger.info("\n\nCompletion generated successfully.")
         completed_answer = "".join(answer)
         chat_history = get_session_history("test1")
 
         save_chat_history(session_id="test1", chat_history=chat_history)
-        logger.info(f"The answer is saved to the chat history. with session_id: {chat_history.session_id}")
+        logger.info(
+            f"The answer is saved to the chat history. with session_id: {chat_history.session_id}")
 
         # Handle file output if specified
-        if output_file != "":
-            file_to_write = output_file if output_file else f"""{output}_{datetime.now(TIME_ZONE).strftime('%Y-%m-%d')}.txt"""
+        if output_file:
+            # Check if the user provided an extension, if not, append a timestamp and .txt extension
+            if not any(output_file.endswith(ext) for ext in ACCEPTED_FILE_EXTENSIONS):
+                file_to_write = f"{output_file}_{datetime.now(TIME_ZONE).strftime('%Y-%m-%d')}.txt"
+            else:
+                file_to_write = output_file
+
             write_to_file(file_to_write, completed_answer)
             logger.info(f"Completion saved to {file_to_write}")
         else:
@@ -226,10 +228,9 @@ async def get_completion(input_text, output_file, base_url, temperature, max_tok
         return True
 
     except Exception as e:
-        logger.error(f"Error in get_completion at line {e.__traceback__.tb_lineno}: {e}")
+        logger.error(
+            f"Error in get_completion at line {e.__traceback__.tb_lineno}: {e}")
         return False
-
-# Main function to run the tool
 
 
 async def main():
@@ -237,18 +238,46 @@ async def main():
 
     if len(sys.argv) == 1:
         print(f"""Please provide a file as the first argument. follwing by the command line arguments you can use -h or --help to see the help message \n 
-               Or you can use the command line arguments directly without providing a file but with arguments --input_text or -i to provide the input text""") 
+               Or you can use the command line arguments directly without providing a file but with arguments --input_text or -i to provide the input text""")
         return
-    context = None
 
-    
-    # Check if argv[1] is provided and if it is a file we read the context from the file
-    # The context can be a JSON file or a text file
-    # then using context with LLM Prompt to generate the completion
+    context: str = ""
+    file_path: str = ""
+    pre_prompt: str = ""
 
-    if len(sys.argv) > 1 and os.path.exists(sys.argv[1]):
-        context = get_file_content(sys.argv[1])
-        # logger.info(f"Context: {context}")
+    for arg in sys.argv[1:]:
+        if os.path.exists(arg):  # Check if any argument is a valid file path
+            file_path = arg
+            break
+
+    if file_path:
+        # Determine the file type and load the content accordingly
+        if file_path.endswith('.json') or file_path.endswith('.txt'):
+            context = get_file_content(file_path)
+        elif file_path.endswith('.pdf'):
+            docs = load_pdf(file_path)
+            context = format_docs(docs) if docs else None
+        elif file_path.endswith('.docx'):
+            docs = read_file_docx(file_path)
+            context = format_docs(docs) if docs else None
+        else:
+            print(f"Unsupported file format: {file_path}")
+            return
+
+   # Handle input text from CLI
+    input_text = generic_set_argv('--input_text', '-i').get(
+        '--input_text') or generic_set_argv('--input_text', '-i').get('-i')
+
+    # Handling different scenarios based on input presence
+    if not input_text and not context:
+        pprint.pprint(
+            "If no file is provided, please provide the input text using --input_text or -i.")
+        return
+    elif not context:
+        pprint.pprint("Please select the choice to perform the task.")
+    elif not input_text:
+        pprint.pprint(
+            "We will use a pre-prompt that you will select to perform the task for your file.")
 
     arguments = generic_set_argv(
         '--version', '-v', '--help', '-h', '--howto',
@@ -256,7 +285,7 @@ async def main():
         '--temperature', '-t', '--max_tokens',
         '--api_key', '-a', '--model', '-m',
         '--base-url', '-u',
-        '--models'
+        '--models', '--select_choice', '-sc'
     )
 
     # put', '-o', '--temperature', '-t', '--max_tokens', '--api_key', '-a', '--model', '-m', '--base-url', '-u'
@@ -286,32 +315,81 @@ async def main():
     # Check if the help flag is present
     if arguments.get('--help') or arguments.get('-h') or arguments.get('--howto'):
         help_message = get_help()
-        print(help_message)
-        # logger.info(help_message)
+        logger.info(help_message)
         return
 
-    # Check for input text
-    input_text = arguments.get('--input_text') or arguments.get('-i')
-    if not input_text:
-        input_text = get_input()
-
+    select_choices = arguments.get('--select_choice') or arguments.get('-sc')
     
-    # Call get_completion asynchronously
-    completion = await get_completion(
-        input_text=input_text if input_text else "No input text provided please analyze the context",
-        output_file=arguments.get('--output') or arguments.get('-o'),
-        base_url=arguments.get('--base-url') or arguments.get('-u'),
-        temperature=arguments.get('--temperature') or arguments.get('-t'),
-        max_tokens=arguments.get('--max_tokens'),
-        api_key=arguments.get('--api_key') or arguments.get('-a'),
-        # if model is not provided, use gpt-4o
-        model=arguments.get('--model') or arguments.get('-m'),
-        context=context,
-    )
+    if not input_text and not select_choices:
+        print("Please provide the choice to perform tasks of the tool")
+        print("1. Generate completion (GC or 1)")
+        print("2. Summarize the context (SC or 2)")
+        print("3. Create question from the context (CQ or 3)")
+        select_choices = input(
+            "Please see the above choices and provide the choice with just (GC or SC or CQ): ").strip().lower()
 
-    if completion:
-        logger.info("Completion generated successfully.")
-        return
+
+        if select_choices in ['1', 'gc']:
+            select_choices = 'gc'
+        elif select_choices in ['2', 'sc']:
+            select_choices = 'sc'
+        elif select_choices in ['3', 'cq']:
+            select_choices = 'cq'
+        else:
+            if not input_text:
+                logger.warning(
+                    f"Invalid action specified: {select_choices}. Supported actions are GC, SC, CQ.")
+                return
+            
+  
+
+    try:
+        if select_choices == 'gc' or select_choices == '1':
+            logger.info("Generating completion...")
+            pre_prompt = """
+                You are professional with all the field you will provide
+                information based on the Context".
+            """
+        elif select_choices == 'sc' or select_choices == '2':
+            logger.info("Summarizing the context")
+            pre_prompt = """
+                You are a professional with summarization skills.
+                You will find the key points from the context and summarize it.
+                If you don't see any key points, please say "I don't see any key points".
+            """
+        elif select_choices == 'cq' or select_choices == '3':
+            logger.info("Creating a question from the context")
+            pre_prompt = """
+                You are a professional at question creation.
+                You will create a question from the context provided.
+            """
+        else:
+            if input_text:
+                logger.warning("We will use the --input_text or -i to generate the completion.")
+            else:
+                logger.warning(
+                    "Invalid action specified. Supported actions are GC, SC, CQ.")
+                return
+            # Perform the general processing or completion
+        completion = await get_completion(
+            input_text=input_text if input_text else pre_prompt,
+            output_file=arguments.get('--output') or arguments.get('-o'),
+            base_url=arguments.get('--base-url') or arguments.get('-u'),
+            temperature=arguments.get('--temperature') or arguments.get('-t'),
+            max_tokens=arguments.get('--max_tokens'),
+            api_key=arguments.get('--api_key') or arguments.get('-a'),
+            model=arguments.get('--model') or arguments.get('-m'),
+            context=context,
+        )
+
+        if completion:
+            logger.info("Completion generated successfully.")
+        else:
+            logger.error("Failed to generate completion.")
+
+    except Exception as e:
+        logger.error(f"Error in generating completion: {e}")
+        print(f"Error in generating completion: {e}")
 
 
 if __name__ == '__main__':
