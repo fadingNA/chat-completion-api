@@ -2,6 +2,8 @@
 
 The chat-minal is a command-line tool work on terminal that makes it easy to interact with the OpenAI Chat Completion API using Langchain. This tool allows you to send text prompts and receive AI-generated responses directly from the command line. You can customize the model, set parameters like temperature and token limits, and save the output to a file. 
 
+> Added new feature 0.1.1 pre defined prompt user can select choice for make genAI running task without input text or prompt.
+
 References [Langchain Document](https://api.python.langchain.com/en/latest/llms/langchain_openai.llms.base.OpenAI.html)
 
 ## Demo walkthrough the chatminal
@@ -26,11 +28,6 @@ Demo Link [chat-minal tutorial](https://youtu.be/NT175YPU-FY)
 
 </center>
 
-## Table of Contributors
-
-| Name          | Blog Post (URL)                  | GitHub Repo (URL)                       | Language    |
-|---------------|---------------------------------|-----------------------------------------|-------------|
-| Nonthachai Plodthong    | [Blog Post](https://dev.to/fadingna/open-source-development-187j) | [GitHub Repo](https://github.com/fadingNA/chat-completion-api) | Python + SSH |
 
 ## Overview
 
@@ -53,6 +50,7 @@ Langchain is a Python or Javascript library that provide a flexibility to intera
 - Includes error handling and logging
 - Streaming Response
 - Selecting Models
+- Selected Choise for predefiend prompt
 
 ## Installation
 
@@ -89,6 +87,7 @@ Langchain is a Python or Javascript library that provide a flexibility to intera
 | `--api_key, -a`      | OpenAI API Key.                                      |
 | `--model, -m`        | Model for the completion.                            |
 | `--models`           | List all available models on OpenAI.                 |
+| `--select_choices`   | Will use a pre defined prompt                        |
 
 ## Available Functions
 
@@ -112,6 +111,13 @@ Langchain is a Python or Javascript library that provide a flexibility to intera
 
 - Python 3.7+
 - An OpenAI API key
+
+
+## Table of Contributors
+
+| Name          | Blog Post (URL)                  | GitHub Repo (URL)                       | Language    |
+|---------------|---------------------------------|-----------------------------------------|-------------|
+| Nonthachai Plodthong    | [Blog Post](https://dev.to/fadingna/open-source-development-187j) | [GitHub Repo](https://github.com/fadingNA/chat-completion-api) | Python + SSH |
 
 
 # License
