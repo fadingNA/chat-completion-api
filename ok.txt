@@ -1,0 +1,16 @@
+2024-09-12 17:09:06:
+Sure, I can provide a translation of the text to Chinese. Here is the translation:
+
+### 计算机视觉应用
+
+#### 工业应用
+1. **精确抠图**：用于在前景和背景元素之间插入新元素。
+2. **动作捕捉（MoCap）**：利用多台摄像机观察的反射标记
+2024-09-12 17:09:43:
+Sure, I can provide a translation of the text to French. Here is the translation:
+
+### Applications de la vision par ordinateur
+
+#### Applications industrielles
+1. **Détourage précis** : Utilisé pour insérer de nouveaux éléments entre les éléments de premier plan et d'arrière-plan.
+2. **Capture de mouvement (MoCap)** : Utilisation de marqueurs rétro-réfléchissants vus par plusieurs caméras

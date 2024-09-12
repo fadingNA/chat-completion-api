@@ -124,7 +124,7 @@ def get_available_models(api_key=None):
 # ADDITIONAL FUNCTIONS TO Set the temperature, max_tokens, api_key, and model
 
 
-async def get_completion(input_text, output_file, base_url, temperature, max_tokens, api_key, model, context=None, output=None):
+async def get_completion(input_text, output_file, base_url, temperature, max_tokens, api_key, model, context=None, output=None, selected_choice=None, target_language="Chinese"):
     """
     Call the Langchain ChatOpenAI Completion API to generate the completion.
 
@@ -136,6 +136,9 @@ async def get_completion(input_text, output_file, base_url, temperature, max_tok
     api_key (str): The OpenAI API key.
     model (str): The model for the completion.
     context (str): The context for the completion.
+    output (str): The output for the completion.
+    selected_choice (str): The selected choice to perform the task.
+    target_language (str): The target language for the translation.
 
     Returns:
     str: The generated completion or None if an error occurs.
@@ -148,7 +151,7 @@ async def get_completion(input_text, output_file, base_url, temperature, max_tok
         # LangchainOpenAI is a class that inherits from OpenAI
 
         if input_text is None:
-            raise ValueError("Input text is missing")
+            print("We will set the input text to the default prompt as translation")
 
         # Debugging the input parameters
         logger.info(
@@ -163,29 +166,47 @@ async def get_completion(input_text, output_file, base_url, temperature, max_tok
         logger.info(f"Cotext: {context[:30]}")
         logger.info(
             f"Output File: {output_file if output_file else 'No output file provided'}")
+        logger.info(
+            f"Target Language: {target_language if target_language else 'No target language provided'}"
+        )
+        logger.info(f"selected_choice: {selected_choice}")
 
         response = LangChainOpenAI(
             base_url=base_url,
             api_key=api_key,
-            model=model if model else "gpt-4o",
+            model=model if model else "gpt-3.5-turbo",
             temperature=temperature if temperature else 0.5,
             max_tokens=max_tokens if max_tokens else 100,
             max_retries=2,
         )
 
         # Get the session history
+        if isinstance(input_text, str):
+            input_text = input_text
+        else:
+            input_text = input_text.decode("utf-8")
 
-        # Create the message template with placeholders
-        message = [
-            ("system",
-             f"You are a professional analyst working with different contexts. Use the provided context: {context} and respond based on the user question."),
-            MessagesPlaceholder(variable_name="history"),
-            ("human", f"{input_text}")
-        ]
+        if isinstance(context, str):
+            context = context
+        else:
+            context = context.decode("utf-8")
 
-        prompt = ChatPromptTemplate.from_messages(
-            message
-        )
+        # Create the message template with placeholders based on the selected task
+        if selected_choice == 'translate':
+            message = [
+                ("system", f"You are a helpful assistant that translates {context}. to {target_language}"),
+                MessagesPlaceholder(variable_name="history"),
+                ("human", f"{input_text}")
+            ]
+        else:
+            message = [
+                ("system", f"You are a professional analyst working with different contexts. Use the provided context: {context} and respond based on the user question."),
+                MessagesPlaceholder(variable_name="history"),
+                ("human", f"{input_text}")
+            ]
+
+        prompt = ChatPromptTemplate.from_messages(message)
+
 
         # Create Runnable with message LLM | Prompt we can use "|" to combine the two objects
         runnable = prompt | response
@@ -244,6 +265,8 @@ async def main():
     context: str = ""
     file_path: str = ""
     pre_prompt: str = ""
+    target_language: str = "Chinese"
+
 
     for arg in sys.argv[1:]:
         if os.path.exists(arg):  # Check if any argument is a valid file path
@@ -252,6 +275,9 @@ async def main():
 
     if file_path:
         # Determine the file type and load the content accordingly
+        if file_path and not os.path.exists(file_path):
+            print(f"File not found: {file_path}")
+            return
         if file_path.endswith('.json') or file_path.endswith('.txt'):
             context = get_file_content(file_path)
         elif file_path.endswith('.pdf'):
@@ -273,9 +299,9 @@ async def main():
         pprint.pprint(
             "If no file is provided, please provide the input text using --input_text or -i.")
         return
-    elif not context:
-        pprint.pprint("Please select the choice to perform the task.")
-    elif not input_text:
+    elif not context and input_text:
+        pprint.pprint("Generate anaswer based on the input text provided.")
+    elif not input_text and context:
         pprint.pprint(
             "We will use a pre-prompt that you will select to perform the task for your file.")
 
@@ -285,7 +311,8 @@ async def main():
         '--temperature', '-t', '--max_tokens',
         '--api_key', '-a', '--model', '-m',
         '--base-url', '-u',
-        '--models', '--select_choice', '-sc'
+        '--models', '--select_choice', '-sc',
+        '--target_language', '-tl'
     )
 
     # put', '-o', '--temperature', '-t', '--max_tokens', '--api_key', '-a', '--model', '-m', '--base-url', '-u'
@@ -319,60 +346,33 @@ async def main():
         return
 
     select_choices = arguments.get('--select_choice') or arguments.get('-sc')
-    
+
     if not input_text and not select_choices:
         print("Please provide the choice to perform tasks of the tool")
-        print("1. Generate completion (GC or 1)")
-        print("2. Summarize the context (SC or 2)")
-        print("3. Create question from the context (CQ or 3)")
-        select_choices = input(
-            "Please see the above choices and provide the choice with just (GC or SC or CQ): ").strip().lower()
+        print("1. Translate English to Chinese")
+        print("2. Translate Chinese to English")
+        print("3. Translate English to French")
+        select_choices_language_select = input(
+            "Please see the above choices and provide the choice with just (1,2,3)").strip().lower()
 
-
-        if select_choices in ['1', 'gc']:
-            select_choices = 'gc'
-        elif select_choices in ['2', 'sc']:
-            select_choices = 'sc'
-        elif select_choices in ['3', 'cq']:
-            select_choices = 'cq'
+        if select_choices_language_select == '1':
+            target_language = "Chinese"
+            input_text = "Translate the provided text to Chinese"
+        elif select_choices_language_select == '2':
+            target_language = "English"
+            input_text = "Translate the provided text to English"
+        elif select_choices_language_select == '3':
+            target_language = "French"
+            input_text = "Translate the provided text to French"
         else:
-            if not input_text:
-                logger.warning(
-                    f"Invalid action specified: {select_choices}. Supported actions are GC, SC, CQ.")
-                return
-            
-  
+            logger.warning("Invalid choice. Please provide the choice with just (1 , 2 ,3 ,4)")
+            return
+        
+        select_choices = "translate"
 
     try:
-        if select_choices == 'gc' or select_choices == '1':
-            logger.info("Generating completion...")
-            pre_prompt = """
-                You are professional with all the field you will provide
-                information based on the Context".
-            """
-        elif select_choices == 'sc' or select_choices == '2':
-            logger.info("Summarizing the context")
-            pre_prompt = """
-                You are a professional with summarization skills.
-                You will find the key points from the context and summarize it.
-                If you don't see any key points, please say "I don't see any key points".
-            """
-        elif select_choices == 'cq' or select_choices == '3':
-            logger.info("Creating a question from the context")
-            pre_prompt = """
-                You are a professional at question creation.
-                You will create a question from the context provided.
-            """
-        else:
-            if input_text:
-                logger.warning("We will use the --input_text or -i to generate the completion.")
-            else:
-                logger.warning(
-                    "Invalid action specified. Supported actions are GC, SC, CQ.")
-                return
-            # Perform the general processing or completion
         completion = await get_completion(
-            input_text=input_text if input_text else pre_prompt,
+            input_text=input_text if input_text else None,
             output_file=arguments.get('--output') or arguments.get('-o'),
             base_url=arguments.get('--base-url') or arguments.get('-u'),
             temperature=arguments.get('--temperature') or arguments.get('-t'),
@@ -380,6 +380,8 @@ async def main():
             api_key=arguments.get('--api_key') or arguments.get('-a'),
             model=arguments.get('--model') or arguments.get('-m'),
             context=context,
+            selected_choice=select_choices,
+            target_language=target_language
         )
 
         if completion:
