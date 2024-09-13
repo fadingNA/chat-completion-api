@@ -14,3 +14,23 @@ Sure, I can provide a translation of the text to French. Here is the translation
 #### Applications industrielles
 1. **Détourage précis** : Utilisé pour insérer de nouveaux éléments entre les éléments de premier plan et d'arrière-plan.
 2. **Capture de mouvement (MoCap)** : Utilisation de marqueurs rétro-réfléchissants vus par plusieurs caméras
+2024-09-13 08:12:11:
+Here is the translation of the text to Chinese:
+
+### 计算机视觉应用
+
+#### 工业应用
+1. **精确抠图**：用于在前景和背景元素之间插入新元素。
+2. **动作捕捉（MoCap）**：利用多台摄像机观察的反射标记进行动作捕捉，
+2024-09-13 08:12:24:
+The text discusses the field of computer vision, which involves enabling computers to interpret visual data from the world. It covers various industrial and consumer-level applications, such as precise matting, motion capture, surveillance, and fingerprint recognition. The applications include image stitching, exposure bracketing, morphing, 3D modeling, video stabilization, face detection, and visual authentication. The text emphasizes the importance of practical applications in motivating and inspiring students to learn computer vision. It also highlights the scientific and statistical approaches,
+2024-09-13 08:15:31:
+The text introduces the concept of computer vision, which focuses on enabling computers to interpret visual data from images and videos. It discusses various industrial applications such as precise matting, motion capture, surveillance, and fingerprint recognition. Additionally, it mentions consumer-level applications like image stitching, exposure bracketing, morphing, 3D modeling, video match move, and face detection. The text emphasizes the importance of applications in motivating students to learn computer vision and discusses the scientific and statistical approaches used in the field.
+2024-09-13 08:16:31:
+The text introduces the field of computer vision, which involves enabling computers to interpret visual data from images and videos. It discusses various industrial applications such as precise matting, motion capture, surveillance, and fingerprint recognition. Additionally, it highlights consumer-level applications like image stitching, exposure bracketing, morphing, 3D modeling, video match move, face detection, and visual authentication. The text emphasizes the importance of applications in motivating students to learn computer vision and discusses the scientific and statistical approaches used in the field.
+2024-09-13 08:19:38:
+French: "Bienvenue dans le programme Services de vol du Collège Seneca, où le voyage n'est que le début."
+
+English: "Welcome to the Flight Services program at Seneca College, where the journey is just the beginning."
+2024-09-13 08:20:19:
+The document introduces the Flight Services program at Seneca College, emphasizing practical learning through flight simulation at the Newnham campus. It highlights the use of emergency equipment like torches and hands-on training in aircraft anatomy. The program focuses on essential emergency equipment training, ensuring readiness for various situations, including mastering landing gear operations. Students gain invaluable real-world experience through industry placements with companies like WestJet and Cathay Pacific. The program covers safety procedures, from seatbelt use to emergency evacuations, and explores logistics and cargo compartment management. Seneca College aims to prepare students for successful aviation careers through hands-on training and real-world experiences.

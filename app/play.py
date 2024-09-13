@@ -155,7 +155,7 @@ async def get_completion(input_text, output_file, base_url, temperature, max_tok
 
         # Debugging the input parameters
         logger.info(
-            f"Model: {model if model is not None else 'The model without provide on the command line we will use gpt-4o'}")
+            f"Model: {model if model is not None else 'The model without provide on the command line we will use gpt 3.5 turbo instead.'}")
         logger.info(
             f"Temperature: {temperature if temperature else f'{0.5} (default)'}")
         logger.info(
@@ -381,7 +381,7 @@ async def main():
             model=arguments.get('--model') or arguments.get('-m'),
             context=context,
             selected_choice=select_choices,
-            target_language=target_language
+            target_language=target_language if not input_text else "Prompt defined"
         )
 
         if completion:
