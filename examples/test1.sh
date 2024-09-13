@@ -1,10 +1,9 @@
-API_KEY="...."  # Replace with your API key
-INPUT="Please summarize the key points from the following text:"
+API_KEY=""
+INPUT="Can you explain this in Thai how to use it"
 
 # Run the Python script with the desired arguments
-python3 ../app/play.py ../examples/computer_vision.txt --api_key "$API_KEY" \
--i "$INPUT" \
---temperature 0.7 \
+python3 ../app/play.py ../README.md --api_key "$API_KEY" \
+-t 0.5 \
 --max_tokens 300 \
 --model gpt-4 \
---output_file output.txt
+--output output.txt

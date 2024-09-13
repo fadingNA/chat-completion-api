@@ -170,7 +170,6 @@ async def get_completion(input_text, output_file, base_url, temperature, max_tok
             f"Target Language: {target_language if target_language else 'No target language provided'}"
         )
         logger.info(f"selected_choice: {selected_choice}")
-
         response = LangChainOpenAI(
             base_url=base_url,
             api_key=api_key,
@@ -180,47 +179,47 @@ async def get_completion(input_text, output_file, base_url, temperature, max_tok
             max_retries=2,
         )
 
+        #logger.info(context)
+
         # Get the session history
         if isinstance(input_text, str):
             input_text = input_text
         else:
             input_text = input_text.decode("utf-8")
 
-        if isinstance(context, str):
-            context = context
-        else:
-            context = context.decode("utf-8")
 
         # Create the message template with placeholders based on the selected task
         if selected_choice == 'translate':
             message = [
-                ("system", f"You are a helpful assistant that translates {context}. to {target_language}"),
-                MessagesPlaceholder(variable_name="history"),
+                ("system",
+                 f"You are a helpful assistant that translates {context}. to {target_language}"),
+                #MessagesPlaceholder(variable_name="history"),
                 ("human", f"{input_text}")
             ]
         else:
             message = [
-                ("system", f"You are a professional analyst working with different contexts. Use the provided context: {context} and respond based on the user question."),
-                MessagesPlaceholder(variable_name="history"),
+                ("system",
+                 f"You are a professional analyst working with different contexts. Use the provided context: {context} and respond based on the user question."),
+                #MessagesPlaceholder(variable_name="history"),
                 ("human", f"{input_text}")
             ]
 
-        prompt = ChatPromptTemplate.from_messages(message)
 
+        prompt = ChatPromptTemplate.from_messages(message)
 
         # Create Runnable with message LLM | Prompt we can use "|" to combine the two objects
         runnable = prompt | response
 
         # Manage message history with RunnableWithMessageHistory
-        with_message_history = RunnableWithMessageHistory(
-            runnable,
-            get_session_history,
-        )
+       # with_message_history = RunnableWithMessageHistory(
+          #  runnable,
+         #   get_session_history,
+       # )
 
         # async for chunk in response.astream(input_text):
         answer = []
         print("\n" + "*" * 100)
-        for chunk in with_message_history.stream([HumanMessage(content=input_text)], config={"configurable": {"session_id": "test1"}}):
+        for chunk in runnable.stream({"input_text": input_text}):
             print(chunk.content, end="", flush=True)
             answer.append(chunk.content)
         print("\n" + "*" * 100)
@@ -229,7 +228,7 @@ async def get_completion(input_text, output_file, base_url, temperature, max_tok
         completed_answer = "".join(answer)
         chat_history = get_session_history("test1")
 
-        save_chat_history(session_id="test1", chat_history=chat_history)
+        save_chat_history(session_id="test2", chat_history=chat_history)
         logger.info(
             f"The answer is saved to the chat history. with session_id: {chat_history.session_id}")
 
@@ -257,6 +256,28 @@ async def get_completion(input_text, output_file, base_url, temperature, max_tok
 async def main():
     # Check for file arguments
 
+    arguments = generic_set_argv(
+        '--version', '-v', '--help', '-h', '--howto',
+        '--input_text', '-i', '--output', '-o',
+        '--temperature', '-t', '--max_tokens',
+        '--api_key', '-a', '--model', '-m',
+        '--base-url', '-u',
+        '--models', '--select_choice', '-sc',
+        '--target_language', '-tl'
+    )
+    # Check if the version flag is present
+    if arguments.get('--version') or arguments.get('-v'):
+        
+        print(f"{TOOL_NAME} version: {VERSION}")
+        logger.info(f"{TOOL_NAME} version: {VERSION}")
+        return
+    
+    # Check if the help flag is present
+    if arguments.get('--help') or arguments.get('-h') or arguments.get('--howto'):
+        help_message = get_help()
+        logger.info(help_message)
+        return
+
     if len(sys.argv) == 1:
         print(f"""Please provide a file as the first argument. follwing by the command line arguments you can use -h or --help to see the help message \n 
                Or you can use the command line arguments directly without providing a file but with arguments --input_text or -i to provide the input text""")
@@ -266,7 +287,6 @@ async def main():
     file_path: str = ""
     pre_prompt: str = ""
     target_language: str = "Chinese"
-
 
     for arg in sys.argv[1:]:
         if os.path.exists(arg):  # Check if any argument is a valid file path
@@ -287,8 +307,9 @@ async def main():
             docs = read_file_docx(file_path)
             context = format_docs(docs) if docs else None
         else:
-            print(f"Unsupported file format: {file_path}")
-            return
+            context = get_file_content(file_path)
+            context = context.replace('{', '{{').replace('}', '}}')
+            #context = format_docs(docs) if docs else None
 
    # Handle input text from CLI
     input_text = generic_set_argv('--input_text', '-i').get(
@@ -298,26 +319,11 @@ async def main():
     if not input_text and not context:
         pprint.pprint(
             "If no file is provided, please provide the input text using --input_text or -i.")
-        return
     elif not context and input_text:
         pprint.pprint("Generate anaswer based on the input text provided.")
     elif not input_text and context:
         pprint.pprint(
             "We will use a pre-prompt that you will select to perform the task for your file.")
-
-    arguments = generic_set_argv(
-        '--version', '-v', '--help', '-h', '--howto',
-        '--input_text', '-i', '--output', '-o',
-        '--temperature', '-t', '--max_tokens',
-        '--api_key', '-a', '--model', '-m',
-        '--base-url', '-u',
-        '--models', '--select_choice', '-sc',
-        '--target_language', '-tl'
-    )
-
-    # put', '-o', '--temperature', '-t', '--max_tokens', '--api_key', '-a', '--model', '-m', '--base-url', '-u'
-    # Check if the version flag is present
-    # Parse command-line arguments
 
     if arguments.get('--models'):
         api_key = arguments.get('--api_key') or arguments.get('-a')
@@ -332,18 +338,6 @@ async def main():
         else:
             logger.error("Failed to retrieve models from OpenAI")
             return
-
-    # Check if the version flag is present
-    if arguments.get('--version') or arguments.get('-v'):
-        print(f"{TOOL_NAME} version: {VERSION}")
-        logger.info(f"{TOOL_NAME} version: {VERSION}")
-        return
-
-    # Check if the help flag is present
-    if arguments.get('--help') or arguments.get('-h') or arguments.get('--howto'):
-        help_message = get_help()
-        logger.info(help_message)
-        return
 
     select_choices = arguments.get('--select_choice') or arguments.get('-sc')
 
@@ -365,9 +359,10 @@ async def main():
             target_language = "French"
             input_text = "Translate the provided text to French"
         else:
-            logger.warning("Invalid choice. Please provide the choice with just (1 , 2 ,3 ,4)")
+            logger.warning(
+                "Invalid choice. Please provide the choice with just (1 , 2 ,3 ,4)")
             return
-        
+
         select_choices = "translate"
 
     try:

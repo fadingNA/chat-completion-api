@@ -65,15 +65,17 @@ def generic_set_argv(*args):
     for key in args:
         try:
             index = sys.argv.index(key)
-            #print(f"Index: {index}")
+            # Check if the next argument is not a flag and there is a next argument
             if len(sys.argv) > index + 1 and not sys.argv[index + 1].startswith("-"):
                 parsed_args[key] = sys.argv[index + 1]
+            # Check if it's a flag like -v or -h, set to True
+            elif key in ACCEPTED_HELP_VERION:
+                parsed_args[key] = True
             else:
                 parsed_args[key] = ""
         except ValueError:
-            #print(f"Error: {key} must be an integer.")
+            # Argument not found
             parsed_args[key] = None
-            #sys.exit(1)
     return parsed_args
 
 def get_file_content(file_path):
