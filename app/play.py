@@ -50,15 +50,23 @@ def get_help():
             {TOOL_NAME} [options]
 
             Options:
-            -h, --help, --howto     Show this help message
-            -v, --version           Show the version of the tool
+            -h, --help, --howto              Show this help message
+            -v, --version                    Show the version of the tool
             --input_text, -i                 Input text to generate completion
-            --output, -o                Output file to save the generated completion
-            --temperature, -t           Temperature for the completion
-            --max_tokens            Maximum tokens for the completion
-            --api_key, -a               OpenAI API Key
-            --model, -m                 Model for the completion
-            --select_choice, -sc        Select the choice to perform the task
+            --output, -o                     Output file to save the generated completion
+            --temperature, -t                Temperature for the completion
+            --max_tokens                     Maximum tokens for the completion
+            --api_key, -a                    OpenAI API Key
+            --model, -m                      Model for the completion
+            --select_choice, -sc             Select the choice to perform the task
+
+
+            Examples:
+            Set the input text to generate the completion:
+            1. python3 app/play.py ../<YOUR_FILE> --input_text "Translate the provided text to Chinese" -a YOUR_API_KEY
+            2. python3 app/play.py -i "Tell me about directional derivative" -a YOUR_API_KEY --output
+            2. python3 app/play.py ../<YOUR_FILE> --select_choice translate -a YOUR_API_KEY
+            3. python3 app/play.py ../<YOUR_FILE> --select_choice translate -a YOUR_API_KEY --output
             """
 
     except Exception as e:

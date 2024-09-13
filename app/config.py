@@ -1,5 +1,5 @@
 # App Config
-TOOL_NAME = "OSD 600 Chat Completion Tool"
+TOOL_NAME = "chatminal"
 
 # Version
 VERSION = "0.1.0"

@@ -133,8 +133,6 @@ def read_file_docx(docx):
 def get_session_history(session_id):
     return SQLChatMessageHistory(session_id, "sqlite:///memory.db")
     
-
-
 def save_chat_history(session_id: str, chat_history: BaseChatMessageHistory):
     """
     Save chat history to a JSON file by appending new messages.
