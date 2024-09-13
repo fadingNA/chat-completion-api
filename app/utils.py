@@ -31,15 +31,16 @@ def write_to_file(file_name, data):
 
     text_with_timestamp = f"{current_time}:\n{data}\n"
 
+    file_path = os.path.join(EXAMPLE_FOlDER, file_name)
 
     # Check if the file exists
-    if not os.path.exists(file_name):
+    if not os.path.exists(file_path):
         # If the file does not exist, create it and write data
-        with open(file_name, "w") as f:
+        with open(file_path, "w") as f:
             f.write(text_with_timestamp)
     else:
         # If the file exists, append the data
-        with open(file_name, "a") as f:
+        with open(file_path, "a") as f:
             f.write(text_with_timestamp)
 
 def generic_get_argv(keyword, argv):

@@ -15,3 +15,5 @@ ACCEPTED_FILE_EXTENSIONS = ['.txt', '.pdf', '.docx', '.json']
 
 
 ACCEPTED_HELP_VERION = ['-v', '--version', '-h', '--help']
+
+EXAMPLE_FOlDER = 'examples'
