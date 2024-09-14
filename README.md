@@ -60,9 +60,13 @@ Langchain is a Python or Javascript library that provide a flexibility to intera
    git clone https://github.com/fadingNA/chat-completion-api.git
    cd chat-completion-api
    pip install -r requirements.txt # if you are using pip3 change pip to pip3 instead.
+
+   cd app # to run the play.py file or app/play.py
    ```
 
 ## Usage
+- locate to examples folder to run the bash script
+
   ```bash
   python3 play.py ../examples/sample2.json --api_key sk_xxx \
   # using 2 argv[0] and argv[1] for run file and source file
