@@ -3,6 +3,17 @@ from imports import *
 from config import *
 
 
+def check_microphone():
+    try:
+        for index, name in enumerate(sr.Microphone.list_microphone_names()):
+            logger.info(
+                f"Microphone with name \'{1}\' found for `Microphone(device-index={0}`".format(index, name))
+    except Exception as e:
+        logger.error(
+            f"Error in check_microphone: {e} at line {sys.exc_info()[-1].tb_lineno}")
+        raise e
+
+
 def listen(llm):
     try:
         r = sr.Recognizer()
@@ -25,19 +36,20 @@ def listen(llm):
                         audio,
                         model="medium.en",
                         show_dict=True
-                    )["text"] # This is the text that was recognized
+                    )["text"]  # This is the text that was recognized
 
                     logger.info(f"Recognized: {text}")
                 except Exception as e:
-                    logger.error(f"Error in listen: {e} at line {sys.exc_info()[-1].tb_lineno}")
+                    logger.error(
+                        f"Error in listen: {e} at line {sys.exc_info()[-1].tb_lineno}")
                     raise e
-                
+
                 response_text = llm.predict(human_input=text)
                 logger.info(f"Response: {response_text}")
                 engine.say(response_text)
                 engine.runAndWait()
 
     except Exception as e:
-        logger.error(f"Error in listen: {e} at line {sys.exc_info()[-1].tb_lineno}")
+        logger.error(
+            f"Error in listen: {e} at line {sys.exc_info()[-1].tb_lineno}")
         raise e
-        
