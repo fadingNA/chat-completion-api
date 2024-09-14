@@ -11,3 +11,4 @@ langchain
 pypdf 
 python-docx 
 unstructured
+langchain-groq

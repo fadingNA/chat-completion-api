@@ -8,7 +8,7 @@ alias deactivate 'test $?_OLD_VIRTUAL_PATH != 0 && setenv PATH "$_OLD_VIRTUAL_PA
 # Unset irrelevant variables.
 deactivate nondestructive
 
-setenv VIRTUAL_ENV "/Users/nonthachaiplodthong/Documents/chat-completion-api/osd-chat-completion"
+setenv VIRTUAL_ENV "/Users/nonthachaiplodthong/Documents/test-run2/chat-completion-api/chatminal"
 
 set _OLD_VIRTUAL_PATH="$PATH"
 setenv PATH "$VIRTUAL_ENV/bin:$PATH"
@@ -17,8 +17,8 @@ setenv PATH "$VIRTUAL_ENV/bin:$PATH"
 set _OLD_VIRTUAL_PROMPT="$prompt"
 
 if (! "$?VIRTUAL_ENV_DISABLE_PROMPT") then
-    set prompt = "(osd-chat-completion) $prompt"
-    setenv VIRTUAL_ENV_PROMPT "(osd-chat-completion) "
+    set prompt = "(chatminal) $prompt"
+    setenv VIRTUAL_ENV_PROMPT "(chatminal) "
 endif
 
 alias pydoc python -m pydoc
