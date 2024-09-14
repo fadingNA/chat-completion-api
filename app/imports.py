@@ -21,6 +21,14 @@ from langchain_community.chat_message_histories import SQLChatMessageHistory
 from langchain_groq import ChatGroq
 
 
+#Voice to Text
+#import speech_recognition as sr
+import speech_recognition as sr
+import pyttsx3
+
+engine = pyttsx3.init()
+
+
 
 
 

@@ -271,7 +271,8 @@ async def main():
         '--api_key', '-a', '--model', '-m',
         '--base-url', '-u',
         '--models', '--select_choice', '-sc',
-        '--target_language', '-tl'
+        '--target_language', '-tl',
+        '--voice', '-vc'
     )
     # Check if the version flag is present
     if arguments.get('--version') or arguments.get('-v'):
