@@ -178,10 +178,10 @@ async def get_completion(input_text, output_file, base_url, temperature, max_tok
             f"Target Language: {target_language if target_language else 'No target language provided'}"
         )
         logger.info(f"selected_choice: {selected_choice}")
-        response = LangChainOpenAI(
+        response = ChatGroq( #LangChainOpenAI is a class that inherits from OpenAI
             base_url=base_url,
             api_key=api_key,
-            model=model if model else "gpt-3.5-turbo",
+            model=model if model else "llama-3.1-8b-instant", #model=model if model else "gpt-3.5-turbo",
             temperature=temperature if temperature else 0.5,
             max_tokens=max_tokens if max_tokens else 100,
             max_retries=2,
@@ -356,6 +356,10 @@ async def main():
         print("3. Translate English to French")
         select_choices_language_select = input(
             "Please see the above choices and provide the choice with just (1,2,3)").strip().lower()
+        
+        if not file_path:
+            print("Please provide a file as the second argument after run script.")
+            return
 
         if select_choices_language_select == '1':
             target_language = "Chinese"
