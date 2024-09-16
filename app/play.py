@@ -1,4 +1,6 @@
-from zmq import has
+"""
+Play file to run the CLI tool to generate the completion from Langchain Using GROQ
+"""
 from utils import *  # noqa F403
 from imports import *  # noqa F403
 from config import TOOL_NAME, VERSION, OPEN_AI_MODELS_URL, ACCEPTED_FILE_EXTENSIONS
@@ -219,12 +221,10 @@ async def get_completion(input_text, output_file, base_url, temperature, max_tok
         for chunk in runnable.stream({"input_text": input_text}):
             print(chunk.content, end="", flush=True)
             answer.append(chunk.content)
-            if token_usage and chunk.usage_metadata: # type: ignore
-                completion_token = chunk.usage_metadata.get("input_tokens") # type: ignore
-                output_token = chunk.usage_metadata.get("output_tokens") # type: ignore
-                total_token = chunk.usage_metadata.get("total_tokens") # type: ignore
-
-
+            if token_usage and chunk.usage_metadata:  # type: ignore
+                completion_token = chunk.usage_metadata.get("input_tokens")  # type: ignore
+                output_token = chunk.usage_metadata.get("output_tokens")  # type: ignore
+                total_token = chunk.usage_metadata.get("total_tokens")  # type: ignore
         # Check for the token_usage flag if it is present or not.
         # If present, retrieve the output and input tokens used for the completion.
         # Making two identical loops helps us prevent the IF checks in the loop if the token_usage flag is not used.
@@ -235,10 +235,10 @@ async def get_completion(input_text, output_file, base_url, temperature, max_tok
 
                 # Check for the attribute usage_metadata in the chunk.
                 # Retrieve the output and input tokens if available.
-                if chunk.usage_metadata: # type: ignore
+                if chunk.usage_metadata:  # type: ignore
                     # usage_metadata = {'output_tokens': number, 'input_tokens': number, 'total_tokens': number}
-                    completion_tokens = chunk.usage_metadata.get('output_tokens') # type: ignore
-                    prompt_tokens = chunk.usage_metadata.get('input_tokens') # type: ignore
+                    completion_tokens = chunk.usage_metadata.get('output_tokens')  # type: ignore
+                    prompt_tokens = chunk.usage_metadata.get('input_tokens')  # type: ignore
         else:
             for chunk in runnable.stream({"input_text": input_text}):
                 print(chunk.content, end="", flush=True)
@@ -250,9 +250,9 @@ async def get_completion(input_text, output_file, base_url, temperature, max_tok
 
         logger.info("\n\nCompletion generated successfully.")
         completed_answer = "".join(answer)
-        chat_history = get_session_history("test1") # type: ignore
+        chat_history = get_session_history("test1")  # type: ignore
 
-        save_chat_history(session_id="test2", chat_history=chat_history) # type: ignore
+        save_chat_history(session_id="test2", chat_history=chat_history)  # type: ignore
         logger.info(
             f"The answer is saved to the chat history. with session_id: {chat_history.session_id}")
 
@@ -291,17 +291,17 @@ async def main():
         '--api_key', '-a', '--model', '-m',
         '--base-url', '-u',
         '--models', '--select_choice', '-sc',
-        '--target_language', '-tl','--token-usage'
+        '--target_language', '-tl', '--token-usage'
         # '--voice', '-vc'
     )
     # Check if the version flag is present
-    if arguments.get('--version') or arguments.get('-v'): # type: ignore
+    if arguments.get('--version') or arguments.get('-v'):  # type: ignore
         print(f"{TOOL_NAME} version: {VERSION}")
         logger.info(f"{TOOL_NAME} version: {VERSION}")
         return
 
     # Check if the help flag is present
-    if arguments.get('--help') or arguments.get('-h') or arguments.get('--howto'): # type: ignore
+    if arguments.get('--help') or arguments.get('-h') or arguments.get('--howto'):  # type: ignore
         help_message = get_help()
         logger.info(help_message)
         return
@@ -413,7 +413,7 @@ async def main():
             api_key=arguments.get('--api_key') or arguments.get('-a'),
             model=arguments.get('--model') or arguments.get('-m'),
             context=context,
-            token_usage=arguments.get('--token-usage'), # type: ignore
+            token_usage=arguments.get('--token-usage'),  # type: ignore
             selected_choice=select_choices,
             target_language=target_language if not input_text else "Prompt defined",
         )
