@@ -66,7 +66,7 @@ def generic_set_argv(*args):
             index = sys.argv.index(key)
             if len(sys.argv) > index + 1 and not sys.argv[index + 1].startswith("-"):
                 parsed_args[key] = sys.argv[index + 1]
-            elif key in ["-v", "-h", "--token-usage"]: # Flags without values
+            elif key in ["-v", "-h", "--token-usage"]: 
                 parsed_args[key] = True
             else:
                 parsed_args[key] = ""

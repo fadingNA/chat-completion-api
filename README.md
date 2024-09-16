@@ -92,7 +92,7 @@ Langchain is a Python or Javascript library that provide a flexibility to intera
 | `--model, -m`        | Model for the completion.                            |
 | `--models`           | List all available models on OpenAI.                 |
 | `--select_choices`   | Will use a pre defined prompt                        |
-
+| `--token-usage`     | Token usage for the completion.                      |
 ## Available Functions
 
 | Function                | Description                                             |

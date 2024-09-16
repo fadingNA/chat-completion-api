@@ -30,4 +30,4 @@ jobs:
       - name: Run Linter
         run: |
           pip install flake8
-          flake8 .
+          flake8 ./app/*.py

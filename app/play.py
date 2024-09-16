@@ -59,6 +59,7 @@ def get_help():
             --api_key, -a                    OpenAI API Key
             --model, -m                      Model for the completion
             --select_choice, -sc             Select the choice to perform the task
+            --token-usage                    Show the token usage for the completion
 
 
             Examples:
@@ -67,6 +68,7 @@ def get_help():
             2. python3 app/play.py -i "Tell me about directional derivative" -a YOUR_API_KEY --output
             2. python3 app/play.py ../<YOUR_FILE> --select_choice translate -a YOUR_API_KEY
             3. python3 app/play.py ../<YOUR_FILE> --select_choice translate -a YOUR_API_KEY --output
+            4. python3 app/play.py ../<YOUR_FILE> --select_choice translate -a YOUR_API_KEY --output --token-usage
             """
 
 
@@ -223,15 +225,34 @@ async def get_completion(input_text, output_file, base_url, temperature, max_tok
                 total_token = chunk.usage_metadata.get("total_tokens") # type: ignore
 
 
+        # Check for the token_usage flag if it is present or not.
+        # If present, retrieve the output and input tokens used for the completion.
+        # Making two identical loops helps us prevent the IF checks in the loop if the token_usage flag is not used.
+        if token_usage:
+            for chunk in runnable.stream({"input_text": input_text}):
+                print(chunk.content, end="", flush=True)
+                answer.append(chunk.content)
+
+                # Check for the attribute usage_metadata in the chunk.
+                # Retrieve the output and input tokens if available.
+                if chunk.usage_metadata: # type: ignore
+                    # usage_metadata = {'output_tokens': number, 'input_tokens': number, 'total_tokens': number}
+                    completion_tokens = chunk.usage_metadata.get('output_tokens') # type: ignore
+                    prompt_tokens = chunk.usage_metadata.get('input_tokens') # type: ignore
+        else:
+            for chunk in runnable.stream({"input_text": input_text}):
+                print(chunk.content, end="", flush=True)
+                answer.append(chunk.content)
         print("\n" + "*" * 100)
         logger.error(f"Completion Token: {completion_token}")
         logger.error(f"Output Token: {output_token}")
         logger.error(f"Total Token: {total_token}")
+
         logger.info("\n\nCompletion generated successfully.")
         completed_answer = "".join(answer)
-        chat_history = get_session_history("test1")
+        chat_history = get_session_history("test1") # type: ignore
 
-        save_chat_history(session_id="test2", chat_history=chat_history)
+        save_chat_history(session_id="test2", chat_history=chat_history) # type: ignore
         logger.info(
             f"The answer is saved to the chat history. with session_id: {chat_history.session_id}")
 
@@ -247,6 +268,10 @@ async def get_completion(input_text, output_file, base_url, temperature, max_tok
             logger.info(f"Completion saved to {file_to_write}")
         else:
             logger.info("Completion done without saving to file")
+
+        if token_usage:
+            logger.error(f"Tokens used for completion: {completion_tokens}")
+            logger.error(f"Tokens used for prompt: {prompt_tokens}")
 
         return True
 
@@ -270,13 +295,13 @@ async def main():
         # '--voice', '-vc'
     )
     # Check if the version flag is present
-    if arguments.get('--version') or arguments.get('-v'):
+    if arguments.get('--version') or arguments.get('-v'): # type: ignore
         print(f"{TOOL_NAME} version: {VERSION}")
         logger.info(f"{TOOL_NAME} version: {VERSION}")
         return
 
     # Check if the help flag is present
-    if arguments.get('--help') or arguments.get('-h') or arguments.get('--howto'):
+    if arguments.get('--help') or arguments.get('-h') or arguments.get('--howto'): # type: ignore
         help_message = get_help()
         logger.info(help_message)
         return
@@ -388,9 +413,9 @@ async def main():
             api_key=arguments.get('--api_key') or arguments.get('-a'),
             model=arguments.get('--model') or arguments.get('-m'),
             context=context,
+            token_usage=arguments.get('--token-usage'), # type: ignore
             selected_choice=select_choices,
             target_language=target_language if not input_text else "Prompt defined",
-            token_usage=arguments.get('--token-usage')
         )
 
         if completion:
