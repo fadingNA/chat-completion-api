@@ -60,7 +60,7 @@ def get_help():
             --api_key, -a                    OpenAI API Key
             --model, -m                      Model for the completion
             --select_choice, -sc             Select the choice to perform the task
-            --token_usage, -u               Get the token usage
+            --token_usage                    Gets the completion and prompt token usage
 
 
             Examples:
@@ -212,9 +212,24 @@ async def get_completion(input_text, output_file, base_url, temperature, max_tok
 
         answer = []
         print("\n" + "*" * 100)
-        for chunk in runnable.stream({"input_text": input_text}):
-            print(chunk.content, end="", flush=True)
-            answer.append(chunk.content)
+        
+        # Check for the token_usage flag if it is present or not.
+        # If present, retrieve the output and input tokens used for the completion.
+        # Making two identical loops helps us prevent the IF checks in the loop if the token_usage flag is not used.
+        if token_usage:
+            for chunk in runnable.stream({"input_text": input_text}):
+                print(chunk.content, end="", flush=True)
+                answer.append(chunk.content)
+
+                # Check for the attribute usage_metadata in the chunk. Retrieve the output and input tokens if available.
+                if chunk.usage_metadata:
+                    # usage_metadata = {'output_tokens': number, 'input_tokens': number, 'total_tokens': number}
+                    completion_tokens = chunk.usage_metadata.get('output_tokens')
+                    prompt_tokens = chunk.usage_metadata.get('input_tokens')
+        else:
+            for chunk in runnable.stream({"input_text": input_text}):
+                print(chunk.content, end="", flush=True)
+                answer.append(chunk.content)
         print("\n" + "*" * 100)
 
         logger.info("\n\nCompletion generated successfully.")
@@ -239,8 +254,6 @@ async def get_completion(input_text, output_file, base_url, temperature, max_tok
             logger.info("Completion done without saving to file")
 
         if token_usage:
-            completion_tokens = response.usage.completion_tokens
-            prompt_tokens = response.usage.prompt_tokens
             logger.error(f"Tokens used for completion: {completion_tokens}")
             logger.error(f"Tokens used for prompt: {prompt_tokens}")
 
@@ -262,7 +275,7 @@ async def main():
         '--api_key', '-a', '--model', '-m',
         '--base-url', '-u',
         '--models', '--select_choice', '-sc',
-        '--target_language', '-tl', '--token_usage', '-u',
+        '--target_language', '-tl', '--token_usage',
         #'--voice', '-vc'
     )
     # Check if the version flag is present
@@ -379,7 +392,7 @@ async def main():
             max_tokens=arguments.get('--max_tokens'),
             api_key=arguments.get('--api_key') or arguments.get('-a'),
             model=arguments.get('--model') or arguments.get('-m'),
-            token_usage=arguments.get('--token_usage') or arguments.get('-u'),
+            token_usage=arguments.get('--token_usage'),
             context=context,
             selected_choice=select_choices,
             target_language=target_language if not input_text else "Prompt defined"
