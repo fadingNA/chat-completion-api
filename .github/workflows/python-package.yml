@@ -4,7 +4,7 @@ name: CI for Python
 on:
   pull_request:
     branches:
-      - main  # Replace 'main' with your default branch name if different
+      - main
 
 jobs:
   build:
