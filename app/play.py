@@ -210,7 +210,6 @@ async def get_completion(input_text, output_file, base_url, temperature, max_tok
 
         answer = []
         print("\n" + "*" * 100)
-        
         # Check for the token_usage flag if it is present or not.
         # If present, retrieve the output and input tokens used for the completion.
         # Making two identical loops helps us prevent the IF checks in the loop if the token_usage flag is not used.
@@ -219,7 +218,8 @@ async def get_completion(input_text, output_file, base_url, temperature, max_tok
                 print(chunk.content, end="", flush=True)
                 answer.append(chunk.content)
 
-                # Check for the attribute usage_metadata in the chunk. Retrieve the output and input tokens if available.
+                # Check for the attribute usage_metadata in the chunk.
+                # Retrieve the output and input tokens if available.
                 if chunk.usage_metadata:
                     # usage_metadata = {'output_tokens': number, 'input_tokens': number, 'total_tokens': number}
                     completion_tokens = chunk.usage_metadata.get('output_tokens')
@@ -274,7 +274,7 @@ async def main():
         '--base-url', '-u',
         '--models', '--select_choice', '-sc',
         '--target_language', '-tl', '--token_usage',
-        #'--voice', '-vc'
+        # '--voice', '-vc'
     )
     # Check if the version flag is present
     if arguments.get('--version') or arguments.get('-v'):
