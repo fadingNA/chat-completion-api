@@ -23,6 +23,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s | %(levelname)s | %(
 # Define a directory for example usage
 EXAMPLE_FOLDER = "/path/to/example/folder"  # Adjust this path as needed
 
+
 def create_file_name_with_timestamp():
     """
     Create a unique file name with the current timestamp.
@@ -31,10 +32,10 @@ def create_file_name_with_timestamp():
     """
     return datetime.now().strftime("%Y%m%d%H%M%S") + ".txt"
 
+
 def write_to_file(file_name, data):
     """
     Write data to a file. Creates or overwrites the file if it exists.
-    
     Args:
     file_name (str): The name of the file to write to.
     data (str): The data to write into the file.
@@ -54,14 +55,12 @@ def write_to_file(file_name, data):
 def generic_set_argv(*args):
     """
     Set the command line arguments passed to the script.
-    
     Args:
     argv (list): The command line arguments to set.
     """
     parsed_args = {}
     if args is None:
         return parsed_args
-    
     for key in args:
         try:
             index = sys.argv.index(key)
@@ -74,6 +73,7 @@ def generic_set_argv(*args):
         except ValueError:
             parsed_args[key] = None
     return parsed_args
+
 
 def get_file_content(file_path):
     """
@@ -100,8 +100,10 @@ def get_file_content(file_path):
         logger.error(f"Error reading file {file_path} at line {tb[-1].lineno}: {e}")
         return None
 
+
 def format_docs(docs):
     return "\n\n".join(doc.page_content for doc in docs)
+
 
 def load_pdf(pdf_path):
     try:
@@ -112,6 +114,7 @@ def load_pdf(pdf_path):
         tb = traceback.extract_tb(e.__traceback__)
         logger.error(f"Error reading file {pdf_path} at line {tb[-1].lineno}: {e}")
         return None
+
 
 def read_file_docx(docx):
     try:
@@ -128,8 +131,10 @@ def read_file_docx(docx):
         logger.error(f"Error reading file {docx} at line {tb[-1].lineno}: {e}")
         return None
 
+
 def get_session_history(session_id):
     return SQLChatMessageHistory(session_id, "sqlite:///memory.db")
+
 
 def save_chat_history(session_id: str, chat_history: BaseChatMessageHistory):
     """

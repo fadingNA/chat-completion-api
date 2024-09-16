@@ -1,9 +1,10 @@
-from utils import * # noqa F403
-from imports import * # noqa F403
+from utils import *  # noqa F403
+from imports import *  # noqa F403
 from config import TOOL_NAME, VERSION, OPEN_AI_MODELS_URL, ACCEPTED_FILE_EXTENSIONS
 import sys
 import os
 from typing import Optional
+from pprint import pprint
 
 
 # NEED TO ADD THIS LINE TO IMPORT THE CONFIG FILE
@@ -13,10 +14,10 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
 # Setup logger
-logger = setup_logging() # noqa F405
+logger = setup_logging()  # noqa F405
 
 # Set the timezone
-TIME_ZONE = pytz.timezone('America/Toronto') # noqa F405
+TIME_ZONE = pytz.timezone('America/Toronto')  # noqa F405
 
 # ADDITIONAL FUNCTIONS TO GET THE VERSION AND HELP
 
@@ -71,10 +72,22 @@ def get_help():
 
 
 def get_input():
+    """
+    Get the input text from the command line arguments.
+    Returns:
+    str: The input text or None if not provided.
+    """
     return sys.argv[sys.argv.index('--input_text') + 1] if '--input_text' in sys.argv else None
 
+
 def get_output():
+    """
+    Get the output file from the command line arguments.
+    Returns:
+    str: The output file or None if not provided.
+    """
     return sys.argv[sys.argv.index('--output') + 1] if '--output' in sys.argv else None
+
 
 def get_available_models(api_key=None):
     """
@@ -141,9 +154,10 @@ async def get_completion(input_text, output_file, base_url, temperature, max_tok
         if input_text is None:
             print("We will set the input text to the default prompt as translation")
 
-        logger.info("Model: %s",
+        logger.info("""Model: %s",
                     model if model is not None else
-                        "The model without provide on the command line we will use gpt 3.5 turbo instead.")
+                        "The model without provide on the command line we will use gpt 3.5 turbo instead.
+                    """)
         logger.info("Temperature: %s", temperature if temperature else "0.5 (default)")
         logger.info("Max Tokens: %s", max_tokens if max_tokens else "100 (default)")
         logger.info("Input Text: %s", input_text if input_text else "No input text provided")
@@ -158,7 +172,7 @@ async def get_completion(input_text, output_file, base_url, temperature, max_tok
         response = ChatGroq(
             base_url=base_url,
             api_key=api_key,
-            model=model if model else "llama-3.1-8b-instant", #model=model if model else "gpt-3.5-turbo",
+            model=model if model else "llama-3.1-8b-instant",  # model=model if model else "gpt-3.5-turbo",
             temperature=temperature if temperature else 0.5,
             max_tokens=max_tokens if max_tokens else 100,
             max_retries=2,
@@ -171,25 +185,26 @@ async def get_completion(input_text, output_file, base_url, temperature, max_tok
         else:
             input_text = input_text.decode("utf-8")
 
-
         # Create the message template with placeholders based on the selected task
         if selected_choice == 'translate':
             message = [
                 ("system",
                  f"You are a helpful assistant that translates {context}. to {target_language}"),
-                #MessagesPlaceholder(variable_name="history"),
+                # MessagesPlaceholder(variable_name="history"),
                 ("human", f"{input_text}")
             ]
         else:
             message = [
                 ("system",
-                 f"You are a professional analyst working with different contexts. Use the provided context: {context} and respond based on the user question."),
-                #MessagesPlaceholder(variable_name="history"),
+                 f"""
+                 You are a professional analyst working with different contexts.
+                 Use the provided context: {context} and respond based on the user question.
+                 """),
+                # MessagesPlaceholder(variable_name="history"),
                 ("human", f"{input_text}")
             ]
 
-
-        prompt = ChatPromptTemplate.from_messages(message)
+        prompt = ChatPromptTemplate.from_messages(message)  # noqa F405
 
         # Create Runnable with message LLM | Prompt we can use "|" to combine the two objects
         runnable = prompt | response
@@ -203,9 +218,9 @@ async def get_completion(input_text, output_file, base_url, temperature, max_tok
 
         logger.info("\n\nCompletion generated successfully.")
         completed_answer = "".join(answer)
-        chat_history = get_session_history("test1")
+        chat_history = get_session_history("test1")  # noqa F405
 
-        save_chat_history(session_id="test2", chat_history=chat_history)
+        save_chat_history(session_id="test2", chat_history=chat_history)  # noqa F405
         logger.info(
             f"The answer is saved to the chat history. with session_id: {chat_history.session_id}")
 
@@ -241,15 +256,14 @@ async def main():
         '--base-url', '-u',
         '--models', '--select_choice', '-sc',
         '--target_language', '-tl',
-        #'--voice', '-vc'
+        # '--voice', '-vc'
     )
     # Check if the version flag is present
     if arguments.get('--version') or arguments.get('-v'):
-        
         print(f"{TOOL_NAME} version: {VERSION}")
         logger.info(f"{TOOL_NAME} version: {VERSION}")
         return
-    
+
     # Check if the help flag is present
     if arguments.get('--help') or arguments.get('-h') or arguments.get('--howto'):
         help_message = get_help()
@@ -257,7 +271,7 @@ async def main():
         return
 
     if len(sys.argv) == 1:
-        print(f"""
+        logger.info("""
               Please provide a file as the first argument. follwing by the command line arguments
               you can use -h or --help to see the help message \n
               or you can use the command line arguments directly without providing a file
@@ -267,7 +281,6 @@ async def main():
 
     context = None
     file_path: Optional[str] = None
-    pre_prompt: str = ""
     target_language: str = "Chinese"
 
     for arg in sys.argv[1:]:
@@ -281,22 +294,21 @@ async def main():
             print(f"File not found: {file_path}")
             return
         if file_path.endswith('.json') or file_path.endswith('.txt'):
-            context = get_file_content(file_path)
+            context = get_file_content(file_path)  # noqa F405
             context = str(context).replace('{', '{{').replace('}', '}}')
         elif file_path.endswith('.pdf'):
-            docs = load_pdf(file_path)
+            docs = load_pdf(file_path)  # noqa F405
             context = format_docs(docs) if docs else None
         elif file_path.endswith('.docx'):
-            docs = read_file_docx(file_path)
-            context = format_docs(docs) if docs else None
+            docs = read_file_docx(file_path)  # noqa F405
+            context = format_docs(docs) if docs else None  # noqa F405
         else:
-            context = get_file_content(file_path)
+            context = get_file_content(file_path)  # noqa F405
             context = str(context).replace('{', '{{').replace('}', '}}')
             # context = format_docs(docs) if docs else None
 
-   # Handle input text from CLI
-    input_text = generic_set_argv('--input_text', '-i').get(
-        '--input_text') or generic_set_argv('--input_text', '-i').get('-i')
+    input_text = generic_set_argv('--input_text', '-i').get(  # noqa F405
+        '--input_text') or generic_set_argv('--input_text', '-i').get('-i')  # noqa F405
 
     # Handling different scenarios based on input presence
     if not input_text and not context:
@@ -331,7 +343,6 @@ async def main():
         print("3. Translate English to French")
         select_choices_language_select = input(
             "Please see the above choices and provide the choice with just (1,2,3)").strip().lower()
-        
         if not file_path:
             print("Please provide a file as the second argument after run script.")
             return
@@ -380,4 +391,4 @@ if __name__ == '__main__':
     # Need to using asyncio.run() to run the async function
     # We will using async for stream of Langchain for future development
     # with API request Response as streamingResponse.
-    asyncio.run(main())
+    asyncio.run(main())  # noqa F405
