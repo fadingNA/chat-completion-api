@@ -59,6 +59,7 @@ def get_help():
             --api_key, -a                    OpenAI API Key
             --model, -m                      Model for the completion
             --select_choice, -sc             Select the choice to perform the task
+            --token_usage, -u               Get the token usage
 
 
             Examples:
@@ -113,7 +114,7 @@ def get_available_models(api_key=None):
 # ADDITIONAL FUNCTIONS TO Set the temperature, max_tokens, api_key, and model
 
 
-async def get_completion(input_text, output_file, base_url, temperature, max_tokens, api_key, model,
+async def get_completion(input_text, output_file, base_url, temperature, max_tokens, api_key, model, token_usage,
                          context=None, output=None, selected_choice=None, target_language="Chinese"):
     """
     Call the Langchain ChatOpenAI Completion API to generate the completion.
@@ -222,6 +223,12 @@ async def get_completion(input_text, output_file, base_url, temperature, max_tok
         else:
             logger.info("Completion done without saving to file")
 
+        if token_usage:
+            completion_tokens = response.usage.completion_tokens
+            prompt_tokens = response.usage.prompt_tokens
+            logger.error(f"Tokens used for completion: {completion_tokens}")
+            logger.error(f"Tokens used for prompt: {prompt_tokens}")
+
         return True
 
     except Exception as e:
@@ -240,7 +247,7 @@ async def main():
         '--api_key', '-a', '--model', '-m',
         '--base-url', '-u',
         '--models', '--select_choice', '-sc',
-        '--target_language', '-tl',
+        '--target_language', '-tl', '--token_usage', '-u',
         #'--voice', '-vc'
     )
     # Check if the version flag is present
@@ -361,6 +368,7 @@ async def main():
             max_tokens=arguments.get('--max_tokens'),
             api_key=arguments.get('--api_key') or arguments.get('-a'),
             model=arguments.get('--model') or arguments.get('-m'),
+            token_usage=arguments.get('--token_usage') or arguments.get('-u'),
             context=context,
             selected_choice=select_choices,
             target_language=target_language if not input_text else "Prompt defined"
