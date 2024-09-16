@@ -7,7 +7,7 @@ Contains constants and default settings.
 TOOL_NAME = "chatminal"
 # Version
 VERSION = "0.1.0"
-#OpenAI Models
+# OpenAI Models
 OPEN_AI_MODELS_URL = "https://api.openai.com/v1/models"
 STORE = {}
 ACCEPTED_FILE_EXTENSIONS = ['.txt', '.pdf', '.docx', '.json']

@@ -2,40 +2,44 @@
 Module for importing all necessary modules and setting up logging.
 """
 
-import sys
+import sys  # noqa: F401
 import logging
-import asyncio
-import os
-import json
-from datetime import datetime
-import pprint
-import requests
-import pytz
+import asyncio  # noqa: F401
+import os  # noqa: F401
+import json  # noqa: F401
+from datetime import datetime  # noqa: F401
+import pprint  # noqa: F401
+import requests  # noqa: F401
+import pytz  # noqa: F401
 
+from openai import OpenAI  # noqa: F401
+from langchain_openai import ChatOpenAI as LangChainOpenAI  # noqa: F401
 
-from openai import OpenAI
-from langchain_openai import ChatOpenAI as LangChainOpenAI
+from langchain_core.prompts import (  # noqa: F401
+    ChatPromptTemplate,
+    MessagesPlaceholder
+)
 
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain_community.chat_message_histories import ChatMessageHistory
-from langchain_community.document_loaders import (
+from langchain_community.chat_message_histories import (  # noqa: F401
+    ChatMessageHistory,
+) 
+from langchain_community.document_loaders import (  # noqa: F401
     TextLoader,
     JSONLoader,
     UnstructuredPDFLoader,
     UnstructuredWordDocumentLoader
 )
-from langchain_core.chat_history import BaseChatMessageHistory
-from langchain_core.runnables.history import RunnableWithMessageHistory
-from langchain_core.messages import HumanMessage
-from langchain_community.chat_message_histories import SQLChatMessageHistory
-from langchain_groq import ChatGroq
-import speech_recognition as sr
-import pyttsx3
+from langchain_core.chat_history import BaseChatMessageHistory  # noqa: F401
+from langchain_core.runnables.history import RunnableWithMessageHistory  # noqa: F401
+from langchain_core.messages import HumanMessage  # noqa: F401
+from langchain_community.chat_message_histories import SQLChatMessageHistory  # noqa: F401
+from langchain_groq import ChatGroq  # noqa: F401
+#import speech_recognition as sr  # noqa: F401
+#import pyttsx3
 
-engine = pyttsx3.init()
+#engine = pyttsx3.init()
 
 
-# You might add common utility functions here as well
 def setup_logging():
     """
     Setup logging for the application.

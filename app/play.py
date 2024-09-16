@@ -4,6 +4,8 @@ from config import *
 import sys
 import os
 import json
+from typing import Optional
+
 
 # NEED TO ADD THIS LINE TO IMPORT THE CONFIG FILE
 # This is needed to import the config file from the parent directory
@@ -32,7 +34,7 @@ def get_version():
             return VERSION
     except Exception as e:
         logger.error(
-            f"Error in get_version at line {e.__traceback__.tb_lineno}: {e}")
+            f"Error in get_version at  {e}")
         return None
 
 
@@ -111,7 +113,7 @@ def get_available_models(api_key=None):
 
     except Exception as e:
         logger.error(
-            f"Error in get_available_models at line {e.__traceback__.tb_lineno}: {e}")
+            f"Error in get_available_models at line  {e}")
         return None
 
 # ADDITIONAL FUNCTIONS TO Set the temperature, max_tokens, api_key, and model
@@ -152,20 +154,21 @@ async def get_completion(input_text, output_file, base_url, temperature, max_tok
         logger.info("Max Tokens: %s", max_tokens if max_tokens else "100 (default)")
         logger.info("Input Text: %s", input_text if input_text else "No input text provided")
         # Display the first 30 characters of the context
-        logger.info(f"Cotext: {context[:30]}")
+        logger.info(f"Cotext: {context}")
         logger.info(
             f"Output File: {output_file if output_file else 'No output file provided'}")
         logger.info(
             f"Target Language: {target_language if target_language else 'No target language provided'}"
         )
         logger.info(f"selected_choice: {selected_choice}")
-        response = ChatGroq( #LangChainOpenAI is a class that inherits from OpenAI
+        response = ChatGroq(
             base_url=base_url,
             api_key=api_key,
             model=model if model else "llama-3.1-8b-instant", #model=model if model else "gpt-3.5-turbo",
             temperature=temperature if temperature else 0.5,
             max_tokens=max_tokens if max_tokens else 100,
             max_retries=2,
+            stop_sequences=["\n"],
         )
 
         # Get the session history
@@ -229,7 +232,7 @@ async def get_completion(input_text, output_file, base_url, temperature, max_tok
 
     except Exception as e:
         logger.error(
-            f"Error in get_completion at line {e.__traceback__.tb_lineno}: {e}")
+            f"Error in get_completion at line  {e}")
         return False
 
 
@@ -244,7 +247,7 @@ async def main():
         '--base-url', '-u',
         '--models', '--select_choice', '-sc',
         '--target_language', '-tl',
-        '--voice', '-vc'
+        #'--voice', '-vc'
     )
     # Check if the version flag is present
     if arguments.get('--version') or arguments.get('-v'):
@@ -260,12 +263,14 @@ async def main():
         return
 
     if len(sys.argv) == 1:
-        print(f"""Please provide a file as the first argument. follwing by the command line arguments you can use -h or --help to see the help message \n 
-               Or you can use the command line arguments directly without providing a file but with arguments --input_text or -i to provide the input text""")
+        print(f"""
+              Please provide a file as the first argument. follwing by the command line arguments you can use -h or --help to see the help message \n
+               Or you can use the command line arguments directly without providing a file but with arguments --input_text or -i to provide the input text
+              """)
         return
 
-    context: str = ""
-    file_path: str = ""
+    context: Optional[str] = None  # Allow context to be None initially
+    file_path: Optional[str] = None
     pre_prompt: str = ""
     target_language: str = "Chinese"
 

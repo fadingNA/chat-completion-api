@@ -1,14 +1,27 @@
-from imports import *
-from config import *
+"""
+Utility module with common functions and configurations.
+"""
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import sys
+import os
+import json
+import traceback
 from datetime import datetime
+import logging
+from langchain_community.document_loaders import (
+    UnstructuredPDFLoader,
+    UnstructuredWordDocumentLoader,
+)
+from langchain_community.chat_message_histories import SQLChatMessageHistory
+from langchain_core.chat_history import BaseChatMessageHistory
+from langchain_core.messages import HumanMessage
 
-logger = setup_logging()
+# Initialize logger
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO, format='%(asctime)s | %(levelname)s | %(message)s')
 
-# Import necessary modules
-
-
+# Define a directory for example usage
+EXAMPLE_FOLDER = "/path/to/example/folder"  # Adjust this path as needed
 
 def create_file_name_with_timestamp():
     """
@@ -26,20 +39,14 @@ def write_to_file(file_name, data):
     file_name (str): The name of the file to write to.
     data (str): The data to write into the file.
     """
-
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
     text_with_timestamp = f"{current_time}:\n{data}\n"
+    file_path = os.path.join(EXAMPLE_FOLDER, file_name)
 
-    file_path = os.path.join(EXAMPLE_FOlDER, file_name)
-
-    # Check if the file exists
     if not os.path.exists(file_path):
-        # If the file does not exist, create it and write data
         with open(file_path, "w") as f:
             f.write(text_with_timestamp)
     else:
-        # If the file exists, append the data
         with open(file_path, "a") as f:
             f.write(text_with_timestamp)
 
@@ -66,16 +73,13 @@ def generic_set_argv(*args):
     for key in args:
         try:
             index = sys.argv.index(key)
-            # Check if the next argument is not a flag and there is a next argument
             if len(sys.argv) > index + 1 and not sys.argv[index + 1].startswith("-"):
                 parsed_args[key] = sys.argv[index + 1]
-            # Check if it's a flag like -v or -h, set to True
-            elif key in ACCEPTED_HELP_VERION:
+            elif key in ["-v", "-h"]:  # Replace with your help/version flags
                 parsed_args[key] = True
             else:
                 parsed_args[key] = ""
         except ValueError:
-            # Argument not found
             parsed_args[key] = None
     return parsed_args
 
@@ -94,15 +98,16 @@ def get_file_content(file_path):
             logger.info(f"Reading context from JSON file: {file_path}")
             with open(file_path, "r") as f:
                 json_content = json.load(f)
-                return json.dumps(json_content, indent=4)  # Convert JSON to a formatted string
+                return json.dumps(json_content, indent=4)
         else:
             logger.info(f"Reading context from text file: {file_path}")
             with open(file_path, "r", encoding='utf-8') as f:
                 return f.read()
     except Exception as e:
-        logger.error(f"Error reading file {file_path} at line {e.__traceback__.tb_lineno}: {e}")
+        tb = traceback.extract_tb(e.__traceback__)
+        logger.error(f"Error reading file {file_path} at line {tb[-1].lineno}: {e}")
         return None
-    
+
 def format_docs(docs):
     return "\n\n".join(doc.page_content for doc in docs)
 
@@ -112,27 +117,28 @@ def load_pdf(pdf_path):
         docs = loader.load()
         return docs
     except Exception as e:
-        logger.error(f"Error reading file {pdf_path} at line {e.__traceback__.tb_lineno}: {e}")
+        tb = traceback.extract_tb(e.__traceback__)
+        logger.error(f"Error reading file {pdf_path} at line {tb[-1].lineno}: {e}")
         return None
 
 def read_file_docx(docx):
     try:
         if docx.endswith(".docx"):
             logger.info(f"Reading context from DOCX file: {docx}")
-            loader = UnstructuredWordDocumentLoader(docx, mode="elements",  strategy="fast" )
+            loader = UnstructuredWordDocumentLoader(docx, mode="elements", strategy="fast")
             docs = loader.load()
             return docs
         else:
             logger.warning(f"Unsupported file format: {docx}")
             return None
     except Exception as e:
-        logger.error(f"Error reading file {docx} at line {e.__traceback__.tb_lineno}: {e}")
+        tb = traceback.extract_tb(e.__traceback__)
+        logger.error(f"Error reading file {docx} at line {tb[-1].lineno}: {e}")
         return None
-# later on implement credentials we will add user_id for each conversation
 
 def get_session_history(session_id):
     return SQLChatMessageHistory(session_id, "sqlite:///memory.db")
-    
+
 def save_chat_history(session_id: str, chat_history: BaseChatMessageHistory):
     """
     Save chat history to a JSON file by appending new messages.
@@ -143,31 +149,24 @@ def save_chat_history(session_id: str, chat_history: BaseChatMessageHistory):
     """
     file_path = f"{session_id}_history.json"
 
-    # Convert chat history messages to a serializable format
     new_messages = [
         {"type": "human", "content": message.content} if isinstance(message, HumanMessage) else
         {"type": "ai", "content": message.content, "metadata": message.response_metadata}
         for message in chat_history.messages
     ]
 
-    # Initialize an empty list to hold existing messages
     combined_messages = []
 
-    # Read existing messages if the file exists
     if os.path.exists(file_path):
         with open(file_path, "r") as file:
             try:
-                combined_messages = json.load(file)  # Load existing messages
+                combined_messages = json.load(file)
             except json.JSONDecodeError:
-                pass  # In case of an empty or invalid JSON file, ignore the error
+                pass
 
-    # Append new messages to the existing ones
     combined_messages.extend(new_messages)
 
-    # Save the combined messages back to the JSON file
     with open(file_path, "w") as file:
         json.dump(combined_messages, file)
 
-    logger.info(f"Chat history appended for session {session_id}.")  # Debug print
-
-
+    logger.info(f"Chat history appended for session {session_id}.")
