@@ -1,3 +1,4 @@
+from zmq import has
 from utils import *  # noqa F403
 from imports import *  # noqa F403
 from config import TOOL_NAME, VERSION, OPEN_AI_MODELS_URL, ACCEPTED_FILE_EXTENSIONS
@@ -125,7 +126,7 @@ def get_available_models(api_key=None):
 
 
 async def get_completion(input_text, output_file, base_url, temperature, max_tokens, api_key, model,
-                         context=None, output=None, selected_choice=None, target_language="Chinese"):
+                         context=None, output=None, selected_choice=None, target_language="Chinese", token_usage=False):
     """
     Call the Langchain ChatOpenAI Completion API to generate the completion.
     Parameters:
@@ -167,6 +168,7 @@ async def get_completion(input_text, output_file, base_url, temperature, max_tok
             f"Target Language: {target_language if target_language else 'No target language provided'}"
         )
         logger.info(f"selected_choice: {selected_choice}")
+        logger.info(f"Token Usage: {token_usage}")
         response = ChatGroq(
             base_url=base_url,
             api_key=api_key,
@@ -208,12 +210,23 @@ async def get_completion(input_text, output_file, base_url, temperature, max_tok
         runnable = prompt | response
 
         answer = []
+        completion_token = None
+        output_token = None
+        total_token = None
         print("\n" + "*" * 100)
         for chunk in runnable.stream({"input_text": input_text}):
             print(chunk.content, end="", flush=True)
             answer.append(chunk.content)
-        print("\n" + "*" * 100)
+            if token_usage and chunk.usage_metadata: # type: ignore
+                completion_token = chunk.usage_metadata.get("input_tokens") # type: ignore
+                output_token = chunk.usage_metadata.get("output_tokens") # type: ignore
+                total_token = chunk.usage_metadata.get("total_tokens") # type: ignore
 
+
+        print("\n" + "*" * 100)
+        logger.error(f"Completion Token: {completion_token}")
+        logger.error(f"Output Token: {output_token}")
+        logger.error(f"Total Token: {total_token}")
         logger.info("\n\nCompletion generated successfully.")
         completed_answer = "".join(answer)
         chat_history = get_session_history("test1")
@@ -253,7 +266,7 @@ async def main():
         '--api_key', '-a', '--model', '-m',
         '--base-url', '-u',
         '--models', '--select_choice', '-sc',
-        '--target_language', '-tl',
+        '--target_language', '-tl','--token-usage'
         # '--voice', '-vc'
     )
     # Check if the version flag is present
@@ -303,20 +316,24 @@ async def main():
         else:
             context = get_file_content(file_path)
             context = str(context).replace('{', '{{').replace('}', '}}')
-            # context = format_docs(docs) if docs else None
 
     input_text = generic_set_argv('--input_text', '-i').get(
         '--input_text') or generic_set_argv('--input_text', '-i').get('-i')
 
     # Handling different scenarios based on input presence
     if not input_text and not context:
-        logger.info(
-            "If no file is provided, please provide the input text using --input_text or -i.")
+        logger.info("""
+                    If no file is provided,
+                    please provide the input text using --input_text or -i.
+                    """)
     elif not context and input_text:
-        logger.info("Generate anaswer based on the input text provided.")
+        logger.info("""
+                    Generate anaswer based on the input text provided.
+                    """)
     elif not input_text and context:
-        logger.info(
-            "We will use a pre-prompt that you will select to perform the task for your file.")
+        logger.info("""
+                    We will use a pre-prompt that you will select to perform the task for your file.
+                    """)
 
     if arguments.get('--models'):
         api_key = arguments.get('--api_key') or arguments.get('-a')
@@ -372,7 +389,8 @@ async def main():
             model=arguments.get('--model') or arguments.get('-m'),
             context=context,
             selected_choice=select_choices,
-            target_language=target_language if not input_text else "Prompt defined"
+            target_language=target_language if not input_text else "Prompt defined",
+            token_usage=arguments.get('--token-usage')
         )
 
         if completion:
