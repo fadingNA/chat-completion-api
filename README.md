@@ -74,7 +74,7 @@ Langchain is a Python or Javascript library that provide a flexibility to intera
    --temperature 0.7 \
    --max_tokens 150 \
    --model gpt-4 \ # gpt-4o or gpt-4 
-   --output_file output.txt \
+   --output output.txt \
    
   ```
 

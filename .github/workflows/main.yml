@@ -1,6 +1,5 @@
 name: CI for Python
 
-# Run this workflow whenever a pull request is opened or updated
 on:
   pull_request:
     branches:
