@@ -22,7 +22,7 @@ from langchain_core.prompts import (  # noqa: F401
 
 from langchain_community.chat_message_histories import (  # noqa: F401
     ChatMessageHistory,
-) 
+)
 from langchain_community.document_loaders import (  # noqa: F401
     TextLoader,
     JSONLoader,
@@ -34,10 +34,10 @@ from langchain_core.runnables.history import RunnableWithMessageHistory  # noqa:
 from langchain_core.messages import HumanMessage  # noqa: F401
 from langchain_community.chat_message_histories import SQLChatMessageHistory  # noqa: F401
 from langchain_groq import ChatGroq  # noqa: F401
-#import speech_recognition as sr  # noqa: F401
-#import pyttsx3
+# import speech_recognition as sr  # noqa: F401
+# import pyttsx3
 
-#engine = pyttsx3.init()
+# engine = pyttsx3.init()
 
 
 def setup_logging():

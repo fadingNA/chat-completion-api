@@ -50,14 +50,6 @@ def write_to_file(file_name, data):
         with open(file_path, "a") as f:
             f.write(text_with_timestamp)
 
-def generic_get_argv(keyword, argv):
-    """
-    Get the command line arguments passed to the script.
-    
-    Returns:
-    list: The command line arguments passed to the script.
-    """
-    return sys.argv[1:]
 
 def generic_set_argv(*args):
     """

@@ -1,9 +1,8 @@
-from utils import *
-from imports import *
-from config import *
+from utils import * # noqa F403
+from imports import * # noqa F403
+from config import TOOL_NAME, VERSION, OPEN_AI_MODELS_URL, ACCEPTED_FILE_EXTENSIONS
 import sys
 import os
-import json
 from typing import Optional
 
 
@@ -14,10 +13,10 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
 # Setup logger
-logger = setup_logging()
+logger = setup_logging() # noqa F405
 
 # Set the timezone
-TIME_ZONE = pytz.timezone('America/Toronto')
+TIME_ZONE = pytz.timezone('America/Toronto') # noqa F405
 
 # ADDITIONAL FUNCTIONS TO GET THE VERSION AND HELP
 
@@ -72,15 +71,10 @@ def get_help():
 
 
 def get_input():
-   if '--input_text' in sys.argv or '-i' in sys.argv:
-        return sys.argv[sys.argv.index('--input_text') + 1]
-   else:
-        return None
-
+    return sys.argv[sys.argv.index('--input_text') + 1] if '--input_text' in sys.argv else None
 
 def get_output():
     return sys.argv[sys.argv.index('--output') + 1] if '--output' in sys.argv else None
-
 
 def get_available_models(api_key=None):
     """
@@ -119,7 +113,8 @@ def get_available_models(api_key=None):
 # ADDITIONAL FUNCTIONS TO Set the temperature, max_tokens, api_key, and model
 
 
-async def get_completion(input_text, output_file, base_url, temperature, max_tokens, api_key, model, context=None, output=None, selected_choice=None, target_language="Chinese"):
+async def get_completion(input_text, output_file, base_url, temperature, max_tokens, api_key, model,
+                         context=None, output=None, selected_choice=None, target_language="Chinese"):
     """
     Call the Langchain ChatOpenAI Completion API to generate the completion.
     Parameters:
@@ -142,14 +137,13 @@ async def get_completion(input_text, output_file, base_url, temperature, max_tok
     try:
         if api_key is None:
             raise ValueError("API Key is missing")
-        # LangchainOpenAI is a class that inherits from OpenAI
 
         if input_text is None:
             print("We will set the input text to the default prompt as translation")
 
-        # Debugging the input parameters
-        # Debugging the input parameters
-        logger.info("Model: %s", model if model is not None else "The model without provide on the command line we will use gpt 3.5 turbo instead.")
+        logger.info("Model: %s",
+                    model if model is not None else
+                        "The model without provide on the command line we will use gpt 3.5 turbo instead.")
         logger.info("Temperature: %s", temperature if temperature else "0.5 (default)")
         logger.info("Max Tokens: %s", max_tokens if max_tokens else "100 (default)")
         logger.info("Input Text: %s", input_text if input_text else "No input text provided")
@@ -264,12 +258,14 @@ async def main():
 
     if len(sys.argv) == 1:
         print(f"""
-              Please provide a file as the first argument. follwing by the command line arguments you can use -h or --help to see the help message \n
-               Or you can use the command line arguments directly without providing a file but with arguments --input_text or -i to provide the input text
+              Please provide a file as the first argument. follwing by the command line arguments
+              you can use -h or --help to see the help message \n
+              or you can use the command line arguments directly without providing a file
+              but with arguments --input_text or -i to provide the input text
               """)
         return
 
-    context: Optional[str] = None  # Allow context to be None initially
+    context = None
     file_path: Optional[str] = None
     pre_prompt: str = ""
     target_language: str = "Chinese"
@@ -286,6 +282,7 @@ async def main():
             return
         if file_path.endswith('.json') or file_path.endswith('.txt'):
             context = get_file_content(file_path)
+            context = str(context).replace('{', '{{').replace('}', '}}')
         elif file_path.endswith('.pdf'):
             docs = load_pdf(file_path)
             context = format_docs(docs) if docs else None
@@ -294,8 +291,8 @@ async def main():
             context = format_docs(docs) if docs else None
         else:
             context = get_file_content(file_path)
-            context = context.replace('{', '{{').replace('}', '}}')
-            #context = format_docs(docs) if docs else None
+            context = str(context).replace('{', '{{').replace('}', '}}')
+            # context = format_docs(docs) if docs else None
 
    # Handle input text from CLI
     input_text = generic_set_argv('--input_text', '-i').get(
