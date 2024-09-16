@@ -14,12 +14,10 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
 # Setup logger
-logger = setup_logging()  # noqa F405
+logger = setup_logging()
 
 # Set the timezone
-TIME_ZONE = pytz.timezone('America/Toronto')  # noqa F405
-
-# ADDITIONAL FUNCTIONS TO GET THE VERSION AND HELP
+TIME_ZONE = pytz.timezone('America/Toronto')
 
 
 def get_version():
@@ -205,7 +203,7 @@ async def get_completion(input_text, output_file, base_url, temperature, max_tok
                 ("human", f"{input_text}")
             ]
 
-        prompt = ChatPromptTemplate.from_messages(message)  # noqa F405
+        prompt = ChatPromptTemplate.from_messages(message)
 
         # Create Runnable with message LLM | Prompt we can use "|" to combine the two objects
         runnable = prompt | response
@@ -234,9 +232,9 @@ async def get_completion(input_text, output_file, base_url, temperature, max_tok
 
         logger.info("\n\nCompletion generated successfully.")
         completed_answer = "".join(answer)
-        chat_history = get_session_history("test1")  # noqa F405
+        chat_history = get_session_history("test1")
 
-        save_chat_history(session_id="test2", chat_history=chat_history)  # noqa F405
+        save_chat_history(session_id="test2", chat_history=chat_history)
         logger.info(
             f"The answer is saved to the chat history. with session_id: {chat_history.session_id}")
 
@@ -314,30 +312,30 @@ async def main():
             print(f"File not found: {file_path}")
             return
         if file_path.endswith('.json') or file_path.endswith('.txt'):
-            context = get_file_content(file_path)  # noqa F405
+            context = get_file_content(file_path)
             context = str(context).replace('{', '{{').replace('}', '}}')
         elif file_path.endswith('.pdf'):
-            docs = load_pdf(file_path)  # noqa F405
+            docs = load_pdf(file_path)
             context = format_docs(docs) if docs else None
         elif file_path.endswith('.docx'):
-            docs = read_file_docx(file_path)  # noqa F405
-            context = format_docs(docs) if docs else None  # noqa F405
+            docs = read_file_docx(file_path)
+            context = format_docs(docs) if docs else None
         else:
-            context = get_file_content(file_path)  # noqa F405
+            context = get_file_content(file_path)
             context = str(context).replace('{', '{{').replace('}', '}}')
             # context = format_docs(docs) if docs else None
 
-    input_text = generic_set_argv('--input_text', '-i').get(  # noqa F405
-        '--input_text') or generic_set_argv('--input_text', '-i').get('-i')  # noqa F405
+    input_text = generic_set_argv('--input_text', '-i').get(
+        '--input_text') or generic_set_argv('--input_text', '-i').get('-i')
 
     # Handling different scenarios based on input presence
     if not input_text and not context:
-        pprint.pprint(
+        logger.info(
             "If no file is provided, please provide the input text using --input_text or -i.")
     elif not context and input_text:
-        pprint.pprint("Generate anaswer based on the input text provided.")
+        logger.info("Generate anaswer based on the input text provided.")
     elif not input_text and context:
-        pprint.pprint(
+        logger.info(
             "We will use a pre-prompt that you will select to perform the task for your file.")
 
     if arguments.get('--models'):
@@ -412,4 +410,4 @@ if __name__ == '__main__':
     # Need to using asyncio.run() to run the async function
     # We will using async for stream of Langchain for future development
     # with API request Response as streamingResponse.
-    asyncio.run(main())  # noqa F405
+    asyncio.run(main())
