@@ -42,8 +42,7 @@ def get_help():
     Returns:
     str: help message
     """
-    try:
-        return f"""
+    return f"""
             {TOOL_NAME} - A simple CLI tool to do Chat Completion from OpenAI
 
             Usage:
@@ -69,30 +68,16 @@ def get_help():
             3. python3 app/play.py ../<YOUR_FILE> --select_choice translate -a YOUR_API_KEY --output
             """
 
-    except Exception as e:
-        logger.error(
-            f"Error in get_help at line {e.__traceback__.tb_lineno}: {e}")
-        return None
-
 
 def get_input():
-    try:
-        # Check if '--input_text' or '-i' is in the command-line arguments
-        return sys.argv[sys.argv.index('--input_text') + 1] if '--input_text' in sys.argv else sys.argv[sys.argv.index('-i') + 1]
-    except Exception as e:
-        logger.warning(
-            f"Your input text is missing. It will use the default prompt to generate the completion.")
+   if '--input_text' in sys.argv or '-i' in sys.argv:
+        return sys.argv[sys.argv.index('--input_text') + 1]
+   else:
         return None
 
 
 def get_output():
-    try:
-        if '--output' in sys.argv or '-o' in sys.argv:
-            return sys.argv[sys.argv.index('--output') + 1]
-    except Exception as e:
-        logger.error(
-            f"Error in get_input at line {e.__traceback__.tb_lineno}: {e}")
-        return None
+    return sys.argv[sys.argv.index('--output') + 1] if '--output' in sys.argv else None
 
 
 def get_available_models(api_key=None):
@@ -135,7 +120,6 @@ def get_available_models(api_key=None):
 async def get_completion(input_text, output_file, base_url, temperature, max_tokens, api_key, model, context=None, output=None, selected_choice=None, target_language="Chinese"):
     """
     Call the Langchain ChatOpenAI Completion API to generate the completion.
-
     Parameters:
     input_text (str): The input text to generate the completion.
     output_file (str): The output file to save the generated completion.
@@ -162,14 +146,11 @@ async def get_completion(input_text, output_file, base_url, temperature, max_tok
             print("We will set the input text to the default prompt as translation")
 
         # Debugging the input parameters
-        logger.info(
-            f"Model: {model if model is not None else 'The model without provide on the command line we will use gpt 3.5 turbo instead.'}")
-        logger.info(
-            f"Temperature: {temperature if temperature else f'{0.5} (default)'}")
-        logger.info(
-            f"Max Tokens: {max_tokens if max_tokens else f'{100} (default)'}")
-        logger.info(
-            f"Input Text: {input_text if input_text else 'No input text provided'}")
+        # Debugging the input parameters
+        logger.info("Model: %s", model if model is not None else "The model without provide on the command line we will use gpt 3.5 turbo instead.")
+        logger.info("Temperature: %s", temperature if temperature else "0.5 (default)")
+        logger.info("Max Tokens: %s", max_tokens if max_tokens else "100 (default)")
+        logger.info("Input Text: %s", input_text if input_text else "No input text provided")
         # Display the first 30 characters of the context
         logger.info(f"Cotext: {context[:30]}")
         logger.info(
@@ -186,8 +167,6 @@ async def get_completion(input_text, output_file, base_url, temperature, max_tok
             max_tokens=max_tokens if max_tokens else 100,
             max_retries=2,
         )
-
-        #logger.info(context)
 
         # Get the session history
         if isinstance(input_text, str):
@@ -218,13 +197,6 @@ async def get_completion(input_text, output_file, base_url, temperature, max_tok
         # Create Runnable with message LLM | Prompt we can use "|" to combine the two objects
         runnable = prompt | response
 
-        # Manage message history with RunnableWithMessageHistory
-       # with_message_history = RunnableWithMessageHistory(
-          #  runnable,
-         #   get_session_history,
-       # )
-
-        # async for chunk in response.astream(input_text):
         answer = []
         print("\n" + "*" * 100)
         for chunk in runnable.stream({"input_text": input_text}):

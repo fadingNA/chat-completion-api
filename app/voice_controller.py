@@ -1,3 +1,6 @@
+"""
+This file contains the code for the voice controller.
+"""
 from utils import *
 from imports import *
 from config import *
@@ -39,10 +42,11 @@ def listen(llm):
                     )["text"]  # This is the text that was recognized
 
                     logger.info(f"Recognized: {text}")
+                    return text
                 except Exception as e:
                     logger.error(
                         f"Error in listen: {e} at line {sys.exc_info()[-1].tb_lineno}")
-                    raise e
+                    return ""
 
                 response_text = llm.predict(human_input=text)
                 logger.info(f"Response: {response_text}")

@@ -12,3 +12,5 @@ pypdf
 python-docx 
 unstructured
 langchain-groq
+SpeechRecognition
+pyttsx3

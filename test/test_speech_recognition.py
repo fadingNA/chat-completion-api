@@ -20,7 +20,7 @@ def test_speech_recognition():
             audio = r.listen(source)
             logger.info("Recording complete. Recognizing speech...")
 
-            # Use Google's speech recognition
+            # Whisper from openAI can understand multiple languages
             text = r.recognize_whisper(
                 audio,
                 model="medium",
