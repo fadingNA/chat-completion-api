@@ -195,7 +195,6 @@ def select_provider():
 def extract_chunk_token_usage(chunk, provider):
     completion_tokens = prompt_tokens = 0
 
-
     if provider == "OpenAI API":
         usage = getattr(chunk, 'usage_metadata', None)
         if usage:
@@ -208,4 +207,3 @@ def extract_chunk_token_usage(chunk, provider):
             prompt_tokens = usage_metadata.get('input_tokens', 0)
 
     return completion_tokens, prompt_tokens
-
