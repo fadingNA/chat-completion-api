@@ -130,7 +130,8 @@ def get_available_models(api_key=None):
 
 
 async def get_completion(input_text, output_file, base_url, temperature, max_tokens, api_key, model,
-                         context=None, output=None, selected_choice=None, target_language="Chinese", token_usage=False, provider="Grok API"):
+                         context=None, output=None, selected_choice=None, target_language="Chinese",
+                         token_usage=False, provider="Grok API"):
     """
     Call the Langchain ChatOpenAI Completion API to generate the completion.
     Parameters:
@@ -232,7 +233,7 @@ async def get_completion(input_text, output_file, base_url, temperature, max_tok
         output_token = None
         total_token = None
         print("\n" + "*" * 100)
-        
+
         if token_usage:
             for chunk in runnable.stream({"input_text": input_text}):
                 print(chunk.content, end="", flush=True)
@@ -248,7 +249,6 @@ async def get_completion(input_text, output_file, base_url, temperature, max_tok
             for chunk in runnable.stream({"input_text": input_text}):
                 print(chunk.content, end="", flush=True)
                 answer.append(chunk.content)
-                
         print("\n" + "*" * 100)
         logger.error(f"Completion Token: {completion_token}")
         logger.error(f"Output Token: {output_token}")
