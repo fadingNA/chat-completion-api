@@ -191,7 +191,7 @@ async def get_completion(input_text, output_file, base_url, temperature, max_tok
             response = ChatGroq(
                 base_url=base_url,
                 api_key=api_key,
-                model=model if model else "llama-3.1-8b-instant",  # model=model if model else "gpt-3.5-turbo",
+                model=model if model else "llama-3.1-70b-versatile",  # model=model if model else "gpt-3.5-turbo",
                 temperature=temperature if temperature else 0.5,
                 max_tokens=max_tokens if max_tokens else 100,
                 max_retries=2,
@@ -236,22 +236,20 @@ async def get_completion(input_text, output_file, base_url, temperature, max_tok
 
         if streaming:
             if token_usage:
-                total_completion_tokens = total_prompt_tokens = 0
-
                 for chunk in runnable.stream({"input_text": input_text}):
                     print(chunk.content, end="", flush=True)
                     answer.append(chunk.content)
 
-                    completion_tokens, prompt_tokens = extract_chunk_token_usage(chunk, provider)
-                    total_completion_tokens += completion_tokens
-                    total_prompt_tokens += prompt_tokens
-                    logger.info(chunk)
-                total_tokens = total_completion_tokens + total_prompt_tokens
-                print(f"\nToken Usage: Prompt={total_prompt_tokens}, Completion={total_completion_tokens}, Total={total_tokens}")
-            else:
-                for chunk in runnable.stream({"input_text": input_text}):
-                    print(chunk.content, end="", flush=True)
-                    answer.append(chunk.content)
+                    # Check for the attribute usage_metadata in the chunk.
+                    # Retrieve the output and input tokens if available.
+                    if chunk.usage_metadata:  # type: ignore
+                        # usage_metadata = {'output_tokens': number, 'input_tokens': number, 'total_tokens': number}
+                        completion_tokens = chunk.usage_metadata.get('output_tokens')  # type: ignore
+                        prompt_tokens = chunk.usage_metadata.get('input_tokens')  # type: ignore
+                else:
+                    for chunk in runnable.stream({"input_text": input_text}):
+                        print(chunk.content, end="", flush=True)
+                        answer.append(chunk.content)
         else:
             response = runnable.invoke({"input_text": input_text})
             output_text = response.content if hasattr(response, 'content') else response
