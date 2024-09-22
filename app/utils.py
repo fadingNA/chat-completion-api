@@ -67,7 +67,7 @@ def generic_set_argv(*args):
             logger.info(sys.argv.index(key))
             if len(sys.argv) > index + 1 and not sys.argv[index + 1].startswith("-"):
                 parsed_args[key] = sys.argv[index + 1]
-            elif key in ["-v", "-h", "--token-usage", "--provider", "-p"]:
+            elif key in ["-v", "-h", "--token-usage", "--provider", "-p", "--stream", '-s']:
                 parsed_args[key] = True
             else:
                 parsed_args[key] = ""
@@ -190,3 +190,22 @@ def select_provider():
         logger.error("Invalid Choice, please retry.")
         sys.exit(0)
     return provider
+
+
+def extract_chunk_token_usage(chunk, provider):
+    completion_tokens = prompt_tokens = 0
+
+
+    if provider == "OpenAI API":
+        usage = getattr(chunk, 'usage_metadata', None)
+        if usage:
+            completion_tokens = usage.get('completion_tokens', 0)
+            prompt_tokens = usage.get('prompt_tokens', 0)
+    else:
+        usage_metadata = getattr(chunk, 'usage_metadata', None)
+        if usage_metadata:
+            completion_tokens = usage_metadata.get('output_tokens', 0)
+            prompt_tokens = usage_metadata.get('input_tokens', 0)
+
+    return completion_tokens, prompt_tokens
+

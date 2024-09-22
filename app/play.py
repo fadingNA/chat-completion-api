@@ -131,7 +131,7 @@ def get_available_models(api_key=None):
 
 async def get_completion(input_text, output_file, base_url, temperature, max_tokens, api_key, model,
                          context=None, output=None, selected_choice=None, target_language="Chinese",
-                         token_usage=False, provider="Grok API"):
+                         token_usage=False, provider="Grok API", streaming=False):
     """
     Call the Langchain ChatOpenAI Completion API to generate the completion.
     Parameters:
@@ -229,30 +229,50 @@ async def get_completion(input_text, output_file, base_url, temperature, max_tok
         runnable = prompt | response
 
         answer = []
-        completion_token = None
-        output_token = None
-        total_token = None
+        prompt_tokens = None
+        completion_tokens = None
+        total_tokens = None
         print("\n" + "*" * 100)
 
-        if token_usage:
-            for chunk in runnable.stream({"input_text": input_text}):
-                print(chunk.content, end="", flush=True)
-                answer.append(chunk.content)
+        if streaming:
+            if token_usage:
+                total_completion_tokens = total_prompt_tokens = 0
 
-                # Check for the attribute usage_metadata in the chunk.
-                # Retrieve the output and input tokens if available.
-                if chunk.usage_metadata:  # type: ignore
-                    # usage_metadata = {'output_tokens': number, 'input_tokens': number, 'total_tokens': number}
-                    completion_tokens = chunk.usage_metadata.get('output_tokens')  # type: ignore
-                    prompt_tokens = chunk.usage_metadata.get('input_tokens')  # type: ignore
+                for chunk in runnable.stream({"input_text": input_text}):
+                    print(chunk.content, end="", flush=True)
+                    answer.append(chunk.content)
+
+                    completion_tokens, prompt_tokens = extract_chunk_token_usage(chunk, provider)
+                    total_completion_tokens += completion_tokens
+                    total_prompt_tokens += prompt_tokens
+                    logger.info(chunk)
+                total_tokens = total_completion_tokens + total_prompt_tokens
+                print(f"\nToken Usage: Prompt={total_prompt_tokens}, Completion={total_completion_tokens}, Total={total_tokens}")
+            else:
+                for chunk in runnable.stream({"input_text": input_text}):
+                    print(chunk.content, end="", flush=True)
+                    answer.append(chunk.content)
         else:
-            for chunk in runnable.stream({"input_text": input_text}):
-                print(chunk.content, end="", flush=True)
-                answer.append(chunk.content)
+            response = runnable.invoke({"input_text": input_text})
+            output_text = response.content if hasattr(response, 'content') else response
+
+            answer = [output_text]
+
+            logger.info(response)
+
+            if token_usage:
+                usage = getattr(response, 'usage', None) or getattr(response, 'usage_metadata', None)
+                if usage:
+                    completion_tokens = usage.get('completion_tokens') or usage.get('output_tokens') or 0
+                    prompt_tokens = usage.get('prompt_tokens') or usage.get('input_tokens') or 0
+                    total_tokens = usage.get('total_tokens', 0)
+                else:
+                    logger.error("No usage data available.")
+
         print("\n" + "*" * 100)
-        logger.error(f"Completion Token: {completion_token}")
-        logger.error(f"Output Token: {output_token}")
-        logger.error(f"Total Token: {total_token}")
+        logger.error(f"Prompt Token: {prompt_tokens}")
+        logger.error(f"Completion Token {completion_tokens}")
+        logger.error(f"Total Token: {total_tokens}")
 
         logger.info("\n\nCompletion generated successfully.")
         completed_answer = "".join(answer)
@@ -283,7 +303,7 @@ async def get_completion(input_text, output_file, base_url, temperature, max_tok
 
     except Exception as e:
         logger.error(
-            f"Error in get_completion at line  {e}")
+            f"Error in get_completion at line  {e.__traceback__.tb_lineno}")
         return False
 
 
@@ -299,6 +319,7 @@ async def main():
         '--models', '--select_choice', '-sc',
         '--target_language', '-tl', '--token-usage',
         '--provider', '-p',
+        '--stream', '-s'
         # '--voice', '-vc'
     )
 
@@ -429,6 +450,10 @@ async def main():
 
         select_choices = "translate"
 
+    is_stream = False
+    if arguments.get('--stream') or arguments.get('-s'):
+        is_stream = True
+
     try:
 
         completion = await get_completion(
@@ -443,7 +468,8 @@ async def main():
             token_usage=arguments.get('--token-usage'),  # type: ignore
             selected_choice=select_choices,
             target_language=target_language if not input_text else "Prompt defined",
-            provider=provider_selected
+            provider=provider_selected,
+            streaming=is_stream
         )
 
         if completion:
