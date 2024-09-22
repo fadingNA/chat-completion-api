@@ -64,9 +64,10 @@ def generic_set_argv(*args):
     for key in args:
         try:
             index = sys.argv.index(key)
+            logger.info(sys.argv.index(key))
             if len(sys.argv) > index + 1 and not sys.argv[index + 1].startswith("-"):
                 parsed_args[key] = sys.argv[index + 1]
-            elif key in ["-v", "-h", "--token-usage"]:
+            elif key in ["-v", "-h", "--token-usage", "--provider", "-p"]:
                 parsed_args[key] = True
             else:
                 parsed_args[key] = ""
@@ -167,3 +168,25 @@ def save_chat_history(session_id: str, chat_history: BaseChatMessageHistory):
         json.dump(combined_messages, file)
 
     logger.info(f"Chat history appended for session {session_id}.")
+
+
+def select_provider():
+    print("Please select Available Provider")
+    print("1. Grok API")
+    print("2. OpenAI API")
+
+    choice = input("Enter the number of your choice: ")
+
+    providers = {
+        '1': "Grok API",
+        '2': "OpenAI API"
+    }
+
+    provider = providers.get(choice)
+
+    if provider:
+        logger.info(f"You selected {provider}")
+    else:
+        logger.error("Invalid Choice, please retry.")
+        sys.exit(0)
+    return provider

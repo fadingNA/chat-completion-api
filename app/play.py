@@ -130,7 +130,7 @@ def get_available_models(api_key=None):
 
 
 async def get_completion(input_text, output_file, base_url, temperature, max_tokens, api_key, model,
-                         context=None, output=None, selected_choice=None, target_language="Chinese", token_usage=False):
+                         context=None, output=None, selected_choice=None, target_language="Chinese", token_usage=False, provider="Grok API"):
     """
     Call the Langchain ChatOpenAI Completion API to generate the completion.
     Parameters:
@@ -173,15 +173,29 @@ async def get_completion(input_text, output_file, base_url, temperature, max_tok
         )
         logger.info(f"selected_choice: {selected_choice}")
         logger.info(f"Token Usage: {token_usage}")
-        response = ChatGroq(
-            base_url=base_url,
-            api_key=api_key,
-            model=model if model else "llama-3.1-8b-instant",  # model=model if model else "gpt-3.5-turbo",
-            temperature=temperature if temperature else 0.5,
-            max_tokens=max_tokens if max_tokens else 100,
-            max_retries=2,
-            stop_sequences=["\n"],
-        )
+
+        response = None
+
+        if provider == "OpenAI API":
+            response = LangChainOpenAI(
+                base_url=base_url,
+                api_key=api_key,
+                model=model if model else "gpt-4",  # model=model if model else "gpt-3.5-turbo",
+                temperature=temperature if temperature else 0.5,
+                max_tokens=max_tokens if max_tokens else 100,
+                max_retries=2,
+                stop_sequences=["\n"],
+            )
+        else:
+            response = ChatGroq(
+                base_url=base_url,
+                api_key=api_key,
+                model=model if model else "llama-3.1-8b-instant",  # model=model if model else "gpt-3.5-turbo",
+                temperature=temperature if temperature else 0.5,
+                max_tokens=max_tokens if max_tokens else 100,
+                max_retries=2,
+                stop_sequences=["\n"],
+            )
 
         # Get the session history
         if isinstance(input_text, str):
@@ -218,16 +232,7 @@ async def get_completion(input_text, output_file, base_url, temperature, max_tok
         output_token = None
         total_token = None
         print("\n" + "*" * 100)
-        for chunk in runnable.stream({"input_text": input_text}):
-            print(chunk.content, end="", flush=True)
-            answer.append(chunk.content)
-            if token_usage and chunk.usage_metadata:  # type: ignore
-                completion_token = chunk.usage_metadata.get("input_tokens")  # type: ignore
-                output_token = chunk.usage_metadata.get("output_tokens")  # type: ignore
-                total_token = chunk.usage_metadata.get("total_tokens")  # type: ignore
-        # Check for the token_usage flag if it is present or not.
-        # If present, retrieve the output and input tokens used for the completion.
-        # Making two identical loops helps us prevent the IF checks in the loop if the token_usage flag is not used.
+        
         if token_usage:
             for chunk in runnable.stream({"input_text": input_text}):
                 print(chunk.content, end="", flush=True)
@@ -243,6 +248,7 @@ async def get_completion(input_text, output_file, base_url, temperature, max_tok
             for chunk in runnable.stream({"input_text": input_text}):
                 print(chunk.content, end="", flush=True)
                 answer.append(chunk.content)
+                
         print("\n" + "*" * 100)
         logger.error(f"Completion Token: {completion_token}")
         logger.error(f"Output Token: {output_token}")
@@ -283,7 +289,7 @@ async def get_completion(input_text, output_file, base_url, temperature, max_tok
 
 async def main():
     # Check for file arguments
-
+    provider_selected = ""
     arguments = generic_set_argv(
         '--version', '-v', '--help', '-h', '--howto',
         '--input_text', '-i', '--output', '-o',
@@ -291,20 +297,22 @@ async def main():
         '--api_key', '-a', '--model', '-m',
         '--base-url', '-u',
         '--models', '--select_choice', '-sc',
-        '--target_language', '-tl', '--token-usage'
+        '--target_language', '-tl', '--token-usage',
+        '--provider', '-p',
         # '--voice', '-vc'
     )
+
     # Check if the version flag is present
     if arguments.get('--version') or arguments.get('-v'):  # type: ignore
         print(f"{TOOL_NAME} version: {VERSION}")
         logger.info(f"{TOOL_NAME} version: {VERSION}")
-        return
+        sys.exit(1)
 
     # Check if the help flag is present
     if arguments.get('--help') or arguments.get('-h') or arguments.get('--howto'):  # type: ignore
         help_message = get_help()
         logger.info(help_message)
-        return
+        sys.exit(1)
 
     if len(sys.argv) == 1:
         logger.info("""
@@ -314,6 +322,19 @@ async def main():
               but with arguments --input_text or -i to provide the input text
               """)
         return
+
+    if arguments.get('--provider') or arguments.get('-p'):
+        provider_selected = select_provider()
+        if provider_selected == "OpenAI API":
+            api_key = arguments.get('--api_key') or arguments.get('-a')
+            if not api_key:
+                logger.error("OpenAI API Key is required when select OpenAI")
+                sys.exit(1)
+            elif not api_key.startswith('sk-'):
+                logger.error("Open API Key should start with 'sk-' ")
+                sys.exit(1)
+        elif provider_selected == "Grok API":
+            pass
 
     context = None
     file_path: Optional[str] = None
@@ -362,6 +383,11 @@ async def main():
 
     if arguments.get('--models'):
         api_key = arguments.get('--api_key') or arguments.get('-a')
+        if "OpenAI API" in provider_selected:
+            if "sk" not in api_key:
+                logger.error("OpenAI Key startwith SK")
+                sys.exit(0)
+
         if api_key is None or api_key == "":
             logger.error("API Key is missing")
             return
@@ -404,6 +430,7 @@ async def main():
         select_choices = "translate"
 
     try:
+
         completion = await get_completion(
             input_text=input_text if input_text else None,
             output_file=arguments.get('--output') or arguments.get('-o'),
@@ -416,6 +443,7 @@ async def main():
             token_usage=arguments.get('--token-usage'),  # type: ignore
             selected_choice=select_choices,
             target_language=target_language if not input_text else "Prompt defined",
+            provider=provider_selected
         )
 
         if completion:
