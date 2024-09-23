@@ -239,6 +239,7 @@ async def get_completion(input_text, output_file, base_url, temperature, max_tok
                 for chunk in runnable.stream({"input_text": input_text}):
                     print(chunk.content, end="", flush=True)
                     answer.append(chunk.content)
+                    
 
                     # Check for the attribute usage_metadata in the chunk.
                     # Retrieve the output and input tokens if available.
@@ -266,7 +267,7 @@ async def get_completion(input_text, output_file, base_url, temperature, max_tok
                     total_tokens = usage.get('total_tokens', 0)
                 else:
                     logger.error("No usage data available.")
-
+        logger.info(runnable)
         print("\n" + "*" * 100)
         logger.error(f"Prompt Token: {prompt_tokens}")
         logger.error(f"Completion Token {completion_tokens}")
