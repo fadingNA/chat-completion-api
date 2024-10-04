@@ -1,6 +1,6 @@
 import os
 import sys
-import tomli  
+import tomli
 from pprint import pprint
 
 """
@@ -28,6 +28,7 @@ config = {
     "EXAMPLE_FOLDER": EXAMPLE_FOLDER
 }
 
+
 def setup_logging():
     """
     Setup the logger for this module.
@@ -38,6 +39,7 @@ def setup_logging():
     logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
     return logging.getLogger(__name__)
 
+
 # Initialize logger
 logger = setup_logging()
 
@@ -45,7 +47,7 @@ logger = setup_logging()
 def load_config():
     """
     Load configuration from the user's home directory TOML file.
-    
+
     Returns:
     dict: Configuration values from the TOML file if it exists, otherwise an empty dictionary.
     """
