@@ -2,7 +2,7 @@
 import sys
 import os
 import asyncio
-from utils import setup_logging
+from utils import setup_logging, write_to_file
 from imports import requests, pytz, LangChainOpenAI, ChatGroq
 from config import TOOL_NAME, VERSION, OPEN_AI_MODELS_URL, ACCEPTED_FILE_EXTENSIONS
 
@@ -21,33 +21,45 @@ class Minal:
         self.max_tokens = 100
         self.model = "gpt-4"
         self.provider = "OpenAI API"
+        self.streaming = False
+        self.token_usage = False
 
     def parse_arguments(self):
         """Parse the command-line arguments."""
-        self.input_text = self.get_cli_argument('--input_text', default="Default input text")
-        self.output_file = self.get_cli_argument('--output')
-        self.api_key = self.get_cli_argument('--api_key')
-        self.temperature = float(self.get_cli_argument('--temperature', default=0.5))
+        self.input_text = self.get_cli_argument(['--input_text', '-i'], default="Default input text")
+        self.output_file = self.get_cli_argument(['--output', '-o'])
+        self.api_key = self.get_cli_argument(['--api_key', '-a'])
+        self.temperature = float(self.get_cli_argument(['--temperature', '-t'], default=0.5))
         self.max_tokens = int(self.get_cli_argument('--max_tokens', default=100))
-        self.model = self.get_cli_argument('--model', default="gpt-4")
+        self.model = self.get_cli_argument(['--model', '-m'], default="gpt-4")
         self.provider = self.get_cli_argument('--provider', default="OpenAI API")
+        self.streaming = self.get_cli_argument(['--stream', '-s'], default=False)
+        self.token_usage = self.get_cli_argument(['--token_usage'], default=False)
 
-        if '--version' in sys.argv:
+        if '--version' in sys.argv or '-v' in sys.argv:
             print(f"{TOOL_NAME} version: {VERSION}")
             sys.exit(0)
 
-        if '--help' in sys.argv or '-h' in sys.argv:
+        if '--help' in sys.argv or '-h' in sys.argv or '--howto' in sys.argv:
             print(self.display_help())
             sys.exit(0)
     
     @staticmethod
-    def get_cli_argument(flag, default=None):
+    def get_cli_argument(flags, default=None):
         """Helper function to retrieve CLI arguments."""
-        if flag in sys.argv:
+        if isinstance(flags, list):
+            for flag in flags:
+                if flag in sys.argv:
+                    try:
+                        return sys.argv[sys.argv.index(flag) + 1]
+                    except IndexError:
+                        logger.error(f"Expected argument after {flag}")
+                        sys.exit(1)
+        elif flags in sys.argv:
             try:
-                return sys.argv[sys.argv.index(flag) + 1]
+                return sys.argv[sys.argv.index(flags) + 1]
             except IndexError:
-                logger.error(f"Expected argument after {flag}")
+                logger.error(f"Expected argument after {flags}")
                 sys.exit(1)
         return default
     
@@ -131,13 +143,46 @@ class Minal:
         
         return None
     
+    async def handle_streaming(self, response):
+        """Handle streaming completion output."""
+        try:
+            async for chunk in response.stream({"input_text": self.input_text}):
+                print(chunk.content, end="", flush=True)  # Stream the output in real-time
+                if self.output_file:
+                    # Save chunk to file incrementally
+                    self.append_output_to_file(self.output_file, chunk.content)
+
+                if self.token_usage:
+                    completion_tokens, prompt_tokens = self.extract_chunk_token_usage(chunk, self.provider)
+                    logger.info(f"Tokens used: completion={completion_tokens}, prompt={prompt_tokens}")
+        except Exception as e:
+            logger.error(f"Error during streaming: {e}")
+
+    def extract_chunk_token_usage(self, chunk, provider):
+        completion_tokens = prompt_tokens = 0
+
+        if provider == "OpenAI API":
+            usage = getattr(chunk, 'usage_metadata', None)
+            if usage:
+                completion_tokens = usage.get('completion_tokens', 0)
+                prompt_tokens = usage.get('prompt_tokens', 0)
+        else:
+            usage_metadata = getattr(chunk, 'usage_metadata', None)
+            if usage_metadata:
+                completion_tokens = usage_metadata.get('output_tokens', 0)
+        return completion_tokens, prompt_tokens
+    
     @staticmethod
     def save_output_to_file(output_file, content):
-        """Saves the output to a file."""
-        with open(output_file, "w") as file:
-            file.write(content)
+        """Saves the full output to a file."""
+        write_to_file(output_file, content)  
         logger.info(f"Output saved to {output_file}")
 
+    @staticmethod
+    def append_output_to_file(output_file, content):
+        """Append the streamed output to a file."""
+        write_to_file(output_file, content) 
+    
     def run(self):
         """Main execution function."""
         self.parse_arguments()
