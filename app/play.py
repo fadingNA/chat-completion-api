@@ -3,11 +3,9 @@ Play file to run the CLI tool to generate the completion from Langchain Using GR
 """
 from utils import *  # noqa F403
 from imports import *  # noqa F403
-from config import TOOL_NAME, VERSION, OPEN_AI_MODELS_URL, ACCEPTED_FILE_EXTENSIONS
+from config import TOOL_NAME, VERSION, OPEN_AI_MODELS_URL
 import sys
 import os
-from typing import Optional
-from pprint import pprint
 from completion_tool import Minal
 
 
@@ -140,7 +138,6 @@ async def main():
         logger.error(
             f"Error in main at line  {e.__traceback__.tb_lineno}")
         return False
-
 
 if __name__ == '__main__':
     # Need to using asyncio.run() to run the async function

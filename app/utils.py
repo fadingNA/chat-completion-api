@@ -52,30 +52,6 @@ def write_to_file(file_name, data):
             f.write(text_with_timestamp)
 
 
-def generic_set_argv(*args):
-    """
-    Set the command line arguments passed to the script.
-    Args:
-    argv (list): The command line arguments to set.
-    """
-    parsed_args = {}
-    if args is None:
-        return parsed_args
-    for key in args:
-        try:
-            index = sys.argv.index(key)
-            logger.info(sys.argv.index(key))
-            if len(sys.argv) > index + 1 and not sys.argv[index + 1].startswith("-"):
-                parsed_args[key] = sys.argv[index + 1]
-            elif key in ["-v", "-h", "--token-usage", "--provider", "-p", "--stream", '-s']:
-                parsed_args[key] = True
-            else:
-                parsed_args[key] = ""
-        except ValueError:
-            parsed_args[key] = None
-    return parsed_args
-
-
 def get_file_content(file_path):
     """
     Read the content of the provided file.
