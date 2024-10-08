@@ -39,7 +39,7 @@ def get_version():
         return None
 
 
-def get_help():
+def display_help():
     """
     Get Help for cli tool by using -h or --help
     Returns:
