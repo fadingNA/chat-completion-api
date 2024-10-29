@@ -29,9 +29,7 @@ from langchain_community.document_loaders import (  # noqa: F401
 from langchain_core.chat_history import BaseChatMessageHistory  # noqa: F401
 from langchain_core.runnables.history import RunnableWithMessageHistory  # noqa: F401
 from langchain_core.messages import HumanMessage  # noqa: F401
-from langchain_community.chat_message_histories import (
-    SQLChatMessageHistory,
-)  # noqa: F401
+
 from langchain_groq import ChatGroq  # noqa: F401
 
 # import speech_recognition as sr  # noqa: F401

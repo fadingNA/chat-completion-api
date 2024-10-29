@@ -38,7 +38,7 @@ class Minal:
                 sys.exit(0)
             if "--help" in sys.argv or "-h" in sys.argv or "--howto" in sys.argv:
                 print(self.display_help())
-                sys.exit(0)    
+                sys.exit(0)
 
             if len(sys.argv) == 1:
                 print(self.display_help())
