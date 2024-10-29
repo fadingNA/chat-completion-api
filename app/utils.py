@@ -18,7 +18,9 @@ from langchain_core.messages import HumanMessage
 
 # Initialize logger
 logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO, format='%(asctime)s | %(levelname)s | %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s | %(levelname)s | %(message)s"
+)
 
 # Define a directory for example usage
 EXAMPLE_FOLDER = "/path/to/example/folder"  # Adjust this path as needed
@@ -70,7 +72,7 @@ def get_file_content(file_path):
                 return json.dumps(json_content, indent=4)
         else:
             logger.info(f"Reading context from text file: {file_path}")
-            with open(file_path, "r", encoding='utf-8') as f:
+            with open(file_path, "r", encoding="utf-8") as f:
                 return f.read()
     except Exception as e:
         tb = traceback.extract_tb(e.__traceback__)
@@ -97,7 +99,9 @@ def read_file_docx(docx):
     try:
         if docx.endswith(".docx"):
             logger.info(f"Reading context from DOCX file: {docx}")
-            loader = UnstructuredWordDocumentLoader(docx, mode="elements", strategy="fast")
+            loader = UnstructuredWordDocumentLoader(
+                docx, mode="elements", strategy="fast"
+            )
             docs = loader.load()
             return docs
         else:
@@ -124,8 +128,15 @@ def save_chat_history(session_id: str, chat_history: BaseChatMessageHistory):
     file_path = f"{session_id}_history.json"
 
     new_messages = [
-        {"type": "human", "content": message.content} if isinstance(message, HumanMessage) else
-        {"type": "ai", "content": message.content, "metadata": message.response_metadata}
+        (
+            {"type": "human", "content": message.content}
+            if isinstance(message, HumanMessage)
+            else {
+                "type": "ai",
+                "content": message.content,
+                "metadata": message.response_metadata,
+            }
+        )
         for message in chat_history.messages
     ]
 
@@ -153,10 +164,7 @@ def select_provider():
 
     choice = input("Enter the number of your choice: ")
 
-    providers = {
-        '1': "Grok API",
-        '2': "OpenAI API"
-    }
+    providers = {"1": "Grok API", "2": "OpenAI API"}
 
     provider = providers.get(choice)
 
@@ -172,14 +180,14 @@ def extract_chunk_token_usage(chunk, provider):
     completion_tokens = prompt_tokens = 0
 
     if provider == "OpenAI API":
-        usage = getattr(chunk, 'usage_metadata', None)
+        usage = getattr(chunk, "usage_metadata", None)
         if usage:
-            completion_tokens = usage.get('completion_tokens', 0)
-            prompt_tokens = usage.get('prompt_tokens', 0)
+            completion_tokens = usage.get("completion_tokens", 0)
+            prompt_tokens = usage.get("prompt_tokens", 0)
     else:
-        usage_metadata = getattr(chunk, 'usage_metadata', None)
+        usage_metadata = getattr(chunk, "usage_metadata", None)
         if usage_metadata:
-            completion_tokens = usage_metadata.get('output_tokens', 0)
-            prompt_tokens = usage_metadata.get('input_tokens', 0)
+            completion_tokens = usage_metadata.get("output_tokens", 0)
+            prompt_tokens = usage_metadata.get("input_tokens", 0)
 
     return completion_tokens, prompt_tokens
