@@ -10,12 +10,12 @@ Contains constants and default settings.
 
 # App Configurations
 TOOL_NAME = "chatminal"
-VERSION = "0.1.0"
+VERSION = "1.2.0"
 OPEN_AI_MODELS_URL = "https://api.openai.com/v1/models"
 STORE = {}
-ACCEPTED_FILE_EXTENSIONS = ['.txt', '.pdf', '.docx', '.json']
-ACCEPTED_HELP_VERION = ['-v', '--version', '-h', '--help']
-EXAMPLE_FOLDER = 'examples'
+ACCEPTED_FILE_EXTENSIONS = [".txt", ".pdf", ".docx", ".json"]
+ACCEPTED_HELP_VERION = ["-v", "--version", "-h", "--help"]
+EXAMPLE_FOLDER = "examples"
 
 # Default configuration dictionary
 config = {
@@ -25,7 +25,7 @@ config = {
     "STORE": STORE,
     "ACCEPTED_FILE_EXTENSIONS": ACCEPTED_FILE_EXTENSIONS,
     "ACCEPTED_HELP_VERION": ACCEPTED_HELP_VERION,
-    "EXAMPLE_FOLDER": EXAMPLE_FOLDER
+    "EXAMPLE_FOLDER": EXAMPLE_FOLDER,
 }
 
 
@@ -36,7 +36,10 @@ def setup_logging():
     Logger object.
     """
     import logging
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+
+    logging.basicConfig(
+        level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+    )
     return logging.getLogger(__name__)
 
 
@@ -52,7 +55,9 @@ def load_config():
     dict: Configuration values from the TOML file if it exists, otherwise an empty dictionary.
     """
     home_dir = os.path.expanduser("~")  # Get the home directory path
-    config_file = os.path.join(home_dir, ".chatminal-config.toml")  # Specify the TOML file name
+    config_file = os.path.join(
+        home_dir, ".chatminal-config.toml"
+    )  # Specify the TOML file name
 
     if os.path.isfile(config_file):  # Check if the file exists
         try:
@@ -61,10 +66,14 @@ def load_config():
                 logger.info(f"Successfully loaded configuration file: {config_file}")
                 return user_config
         except tomli.TOMLDecodeError as e:  # Handle parsing errors
-            logger.error(f"Error: Unable to parse {config_file}. Please check the file format: {e}")
+            logger.error(
+                f"Error: Unable to parse {config_file}. Please check the file format: {e}"
+            )
             sys.exit(1)  # Exit the program if the file format is invalid
     else:
-        logger.warning(f"No configuration file found at {config_file}. Using default settings.")
+        logger.warning(
+            f"No configuration file found at {config_file}. Using default settings."
+        )
         return {}  # Return an empty dictionary if no config file is found
 
 

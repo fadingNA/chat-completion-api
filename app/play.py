@@ -1,6 +1,7 @@
 """
 Play file to run the CLI tool to generate the completion from Langchain Using GROQ
 """
+
 from utils import *  # noqa F403
 from imports import *  # noqa F403
 from config import TOOL_NAME, VERSION, OPEN_AI_MODELS_URL
@@ -19,7 +20,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 logger = setup_logging()
 
 # Set the timezone
-TIME_ZONE = pytz.timezone('America/Toronto')
+TIME_ZONE = pytz.timezone("America/Toronto")
 
 
 def get_version():
@@ -30,11 +31,10 @@ def get_version():
     str: version number
     """
     try:
-        if '--version' in sys.argv or '-v' in sys.argv:
+        if "--version" in sys.argv or "-v" in sys.argv:
             return VERSION
     except Exception as e:
-        logger.error(
-            f"Error in get_version at  {e}")
+        logger.error(f"Error in get_version at  {e}")
         return None
 
 
@@ -79,7 +79,11 @@ def get_input():
     Returns:
     str: The input text or None if not provided.
     """
-    return sys.argv[sys.argv.index('--input_text') + 1] if '--input_text' in sys.argv else None
+    return (
+        sys.argv[sys.argv.index("--input_text") + 1]
+        if "--input_text" in sys.argv
+        else None
+    )
 
 
 def get_output():
@@ -88,7 +92,7 @@ def get_output():
     Returns:
     str: The output file or None if not provided.
     """
-    return sys.argv[sys.argv.index('--output') + 1] if '--output' in sys.argv else None
+    return sys.argv[sys.argv.index("--output") + 1] if "--output" in sys.argv else None
 
 
 def get_available_models(api_key=None):
@@ -99,16 +103,17 @@ def get_available_models(api_key=None):
     dict: JSON response from the API or None if an error occurs.
     """
     try:
-        if '--models' in sys.argv:
-            api_key = api_key or sys.argv[sys.argv.index(
-                '--api_key') + 1] if '--api_key' in sys.argv else sys.argv[sys.argv.index('-a') + 1]
+        if "--models" in sys.argv:
+            api_key = (
+                api_key or sys.argv[sys.argv.index("--api_key") + 1]
+                if "--api_key" in sys.argv
+                else sys.argv[sys.argv.index("-a") + 1]
+            )
             if api_key is None:
                 raise Exception("API Key is missing")
 
             # Make a request to OpenAI API
-            headers = {
-                "Authorization": f"Bearer {api_key}"
-            }
+            headers = {"Authorization": f"Bearer {api_key}"}
             response = requests.get(OPEN_AI_MODELS_URL, headers=headers)
 
             # Check for a successful request
@@ -117,13 +122,14 @@ def get_available_models(api_key=None):
                 return response.json()
             else:
                 logger.error(
-                    f"Failed to retrieve models: {response.status_code} - {response.text}")
+                    f"Failed to retrieve models: {response.status_code} - {response.text}"
+                )
                 return None
 
     except Exception as e:
-        logger.error(
-            f"Error in get_available_models at line  {e}")
+        logger.error(f"Error in get_available_models at line  {e}")
         return None
+
 
 # ADDITIONAL FUNCTIONS TO Set the temperature, max_tokens, api_key, and model
 
@@ -135,11 +141,11 @@ async def main():
         minal.run()
 
     except Exception as e:
-        logger.error(
-            f"Error in main at line  {e.__traceback__.tb_lineno}")
+        logger.error(f"Error in main at line  {e.__traceback__.tb_lineno}")
         return False
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     # Need to using asyncio.run() to run the async function
     # We will using async for stream of Langchain for future development
     # with API request Response as streamingResponse.

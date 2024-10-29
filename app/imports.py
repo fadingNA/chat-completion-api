@@ -15,10 +15,7 @@ import pytz  # noqa: F401
 from openai import OpenAI  # noqa: F401
 from langchain_openai import ChatOpenAI as LangChainOpenAI  # noqa: F401
 
-from langchain_core.prompts import (  # noqa: F401
-    ChatPromptTemplate,
-    MessagesPlaceholder
-)
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder  # noqa: F401
 
 from langchain_community.chat_message_histories import (  # noqa: F401
     ChatMessageHistory,
@@ -27,13 +24,16 @@ from langchain_community.document_loaders import (  # noqa: F401
     TextLoader,
     JSONLoader,
     UnstructuredPDFLoader,
-    UnstructuredWordDocumentLoader
+    UnstructuredWordDocumentLoader,
 )
 from langchain_core.chat_history import BaseChatMessageHistory  # noqa: F401
 from langchain_core.runnables.history import RunnableWithMessageHistory  # noqa: F401
 from langchain_core.messages import HumanMessage  # noqa: F401
-from langchain_community.chat_message_histories import SQLChatMessageHistory  # noqa: F401
+from langchain_community.chat_message_histories import (
+    SQLChatMessageHistory,
+)  # noqa: F401
 from langchain_groq import ChatGroq  # noqa: F401
+
 # import speech_recognition as sr  # noqa: F401
 # import pyttsx3
 
@@ -47,6 +47,7 @@ def setup_logging():
     Returns:
         logging.Logger: The logger object.
     """
-    logging.basicConfig(level=logging.INFO,
-                        format='%(asctime)s | %(levelname)s | %(message)s')
+    logging.basicConfig(
+        level=logging.INFO, format="%(asctime)s | %(levelname)s | %(message)s"
+    )
     return logging.getLogger(__name__)

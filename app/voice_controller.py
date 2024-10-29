@@ -1,6 +1,7 @@
 """
 This file contains the code for the voice controller.
 """
+
 import logging
 import pyttsx3
 import speech_recognition as sr
@@ -10,7 +11,9 @@ engine = pyttsx3.init()
 
 # Setup logger
 logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO, format='%(asctime)s | %(levelname)s | %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s | %(levelname)s | %(message)s"
+)
 
 
 def check_microphone():
@@ -44,7 +47,9 @@ def listen(llm):
 
                 # Recognize speech using Whisper
                 try:
-                    result = r.recognize_whisper(audio, model="medium.en", show_dict=True)
+                    result = r.recognize_whisper(
+                        audio, model="medium.en", show_dict=True
+                    )
                     text = result["text"]  # Extract recognized text
                     logger.info(f"Recognized: {text}")
                     return text
