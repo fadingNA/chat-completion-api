@@ -23,7 +23,7 @@ logging.basicConfig(
 )
 
 # Define a directory for example usage
-EXAMPLE_FOLDER = "/path/to/example/folder"  # Adjust this path as needed
+EXAMPLE_FOLDER = "/examples"
 
 
 def create_file_name_with_timestamp():

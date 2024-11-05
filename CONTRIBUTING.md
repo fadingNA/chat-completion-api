@@ -33,8 +33,6 @@ Thank you for choosing to contribute to Chatminal!
 
 ## Code Formatting and Linting
 
----
-
 **Formatting using Black:**
 
 ```bash
@@ -62,6 +60,28 @@ For the flake8 configuration, we have a `.flake8` file in the root directory of 
 max-line-length = 150
 ignore = F405 , W293, W291
 
+```
+
+---
+
+**Testing Overview**
+
+To ensure code quality adn functionality, we have a few tests in place. You can run the tests using the following command:
+
+```bash
+python3 -m unittest discover -s test
+```
+
+To run specific tests, you can use the following command:
+
+```bash
+python3 -m unittest test.test_play
+```
+
+To run specific test cases, you can use the following command:
+
+```bash
+python3 -m unittest test.test_play.TestPlay.test_play
 ```
 
 ---

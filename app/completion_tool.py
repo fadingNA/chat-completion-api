@@ -2,9 +2,9 @@
 import sys
 import os
 import traceback
-from utils import *  # noqa F403
-from imports import *  # noqa F403
-from config import TOOL_NAME, VERSION, OPEN_AI_MODELS_URL, config
+from app.utils import *  # noqa F403
+from app.imports import *  # noqa F403
+from app.config import TOOL_NAME, VERSION, OPEN_AI_MODELS_URL, config
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -32,96 +32,93 @@ class Minal:
     def parse_arguments(self):
         """Parse the command-line arguments, with fallback to config file."""
         logger.info("Parsing command-line arguments.")
+        exit_code = None  # Set to None initially, then set to 0 or 1 as needed
+
         try:
+            # Check for version and help flags
             if "--version" in sys.argv or "-v" in sys.argv:
                 print(f"{TOOL_NAME} version: {VERSION}")
-                sys.exit(0)
-            if "--help" in sys.argv or "-h" in sys.argv or "--howto" in sys.argv:
+                exit_code = 0
+            elif "--help" in sys.argv or "-h" in sys.argv or "--howto" in sys.argv:
                 print(self.display_help())
-                sys.exit(0)
-
-            if len(sys.argv) == 1:
+                exit_code = 0
+            elif len(sys.argv) == 1:
+                # No arguments provided, display help
                 print(self.display_help())
-                sys.exit(0)
-            elif len(sys.argv) > 1:
-                file_path = sys.argv[1]
-                if os.path.exists(file_path):
-                    self.file_input = self._cleanup_text_on_file(file_path)
-                    logger.info(f"File content loaded from: {file_path}")
-                else:
-                    logger.error(f"File not found: {file_path}")
-                    sys.exit(1)
-            self.input_text = self.get_cli_argument(
-                ["--input_text", "-i"], config.get("input_text", "Default input text")
-            )
-            if self.input_text is None:
-                logger.warning("Input text argument is missing, using default value.")
-                self.input_text = "Default input text"
-
-            self.output_file = self.get_cli_argument(
-                ["--output", "-o"], config.get("output_file")
-            )
-            self.api_key = self.get_cli_argument(
-                ["--api_key", "-a"], config.get("api_key")
-            )
-
-            # Handle temperature argument safely
-            temperature_arg = self.get_cli_argument(
-                ["--temperature", "-t"], config.get("temperature", 0.5)
-            )
-            if temperature_arg is None:
-                logger.warning("Temperature argument is missing, using default value.")
-                self.temperature = 0.5
+                exit_code = 0
             else:
+                # Process the provided file argument
+                self.file_input = None
+                if not sys.argv[1].startswith("-"):
+                    file_path = sys.argv[1]
+                    if os.path.exists(file_path):
+                        self.file_input = self._cleanup_text_on_file(file_path)
+                        logger.info(f"File content loaded from: {file_path}")
+                    else:
+                        logger.error(f"File not found: {file_path}")
+                        exit_code = 1
+                else:
+                    logger.info("No file input provided.")
+
+                # Set other argument values with defaults if not provided
+                self.input_text = self.get_cli_argument(
+                    ["--input_text", "-i"],
+                    config.get("input_text", "Default input text"),
+                )
+                self.output_file = self.get_cli_argument(
+                    ["--output", "-o"], config.get("output_file")
+                )
+                self.api_key = self.get_cli_argument(
+                    ["--api_key", "-a"], config.get("api_key")
+                )
+
+                # Handle temperature argument safely
+                temperature_arg = self.get_cli_argument(
+                    ["--temperature", "-t"], config.get("temperature", 0.5)
+                )
                 try:
                     self.temperature = float(temperature_arg)
-                except ValueError:
+                except (ValueError, TypeError):
                     logger.error(
                         f"Invalid temperature value: {temperature_arg}, using default value."
                     )
                     self.temperature = 0.5
 
-            # Handle max_tokens safely
-            max_tokens_arg = self.get_cli_argument(
-                "--max_tokens", config.get("max_tokens", 100)
-            )
-            if max_tokens_arg is None:
-                logger.warning("Max tokens argument is missing, using default value.")
-                self.max_tokens = 100
-            else:
+                # Handle max_tokens safely
+                max_tokens_arg = self.get_cli_argument(
+                    "--max_tokens", config.get("max_tokens", 100)
+                )
                 try:
                     self.max_tokens = int(max_tokens_arg)
-                except ValueError:
+                except (ValueError, TypeError):
                     logger.error(
                         f"Invalid max tokens value: {max_tokens_arg}, using default value."
                     )
                     self.max_tokens = 100
 
-            self.model = self.get_cli_argument(
-                ["--model", "-m"], config.get("model", "gpt-4")
-            )
-            self.provider = self.get_cli_argument(
-                "--provider", config.get("provider", "OpenAI API")
-            )
-            self.streaming = self.get_cli_argument(
-                ["--stream", "-s"], config.get("streaming", False), is_flag=True
-            )
-            self.token_usage = self.get_cli_argument(
-                ["--token_usage"], config.get("token_usage", False), is_flag=True
-            )
-
-            if "--version" in sys.argv or "-v" in sys.argv:
-                print(f"{TOOL_NAME} version: {VERSION}")
-                sys.exit(0)
-
-            if "--help" in sys.argv or "-h" in sys.argv or "--howto" in sys.argv:
-                print(self.display_help())
-                sys.exit(0)
+                # Set other arguments
+                self.model = self.get_cli_argument(
+                    ["--model", "-m"], config.get("model", "gpt-4")
+                )
+                self.provider = self.get_cli_argument(
+                    "--provider", config.get("provider", "OpenAI API")
+                )
+                self.streaming = self.get_cli_argument(
+                    ["--stream", "-s"], config.get("streaming", False), is_flag=True
+                )
+                self.token_usage = self.get_cli_argument(
+                    ["--token_usage"], config.get("token_usage", False), is_flag=True
+                )
 
         except Exception as e:
             logger.error(f"Error parsing arguments: {e}")
             tb = traceback.extract_tb(e.__traceback__)
             logger.error(f"Error occurred at line {tb[-1].lineno}")
+            exit_code = 1
+
+        # Exit if any exit condition was set
+        if exit_code is not None:
+            sys.exit(exit_code)
 
     def get_cli_argument(self, flags, default=None, is_flag=False):
         """
@@ -151,6 +148,7 @@ class Minal:
                 if is_flag:
                     return True  # Return True if the flag is found and it's a flag
                 try:
+                    logger.info(f"Using CLI argument for {flags}")
                     return sys.argv[sys.argv.index(flags) + 1]
                 except IndexError:
                     logger.error(f"Expected argument after {flags}")
@@ -248,28 +246,25 @@ class Minal:
             return None
 
     def get_prompt_template(self):
-        """Build the prompt template for LangChain."""
-        # Log the inputs for debugging
-        logger.info(f"file_input: {self.file_input}")
-        logger.info(f"input_text: {self.input_text}")
-        try:
-            if not self.file_input or not isinstance(self.file_input, str):
-                logger.error("file_input is invalid or empty.")
-                return None
 
-            if not self.input_text or not isinstance(self.input_text, str):
-                logger.error("input_text is invalid or empty.")
-                return None
+        try:
+            if self.file_input and isinstance(self.file_input, str):
+                # If file_input is provided, include it in the system message
+                system_message = f"""
+                You are a professional analyst working with different contexts.
+                Use the provided context: {self.file_input} and respond based on the user's question.
+                Your answer will not exceed 100 tokens.
+                """
+            else:
+                # If no file_input, provide a generic system message
+                system_message = """
+                You are a professional assistant.
+                Provide a helpful and concise response to the user's question.
+                Your answer will not exceed 100 tokens.
+                """
 
             message = [
-                (
-                    "system",
-                    f"""
-                    You are a professional analyst working with different contexts.
-                    Use the provided context: {self.file_input} and respond based on the user's question.
-                    Your answer will not exceed 100 tokens.
-                    """,
-                ),
+                ("system", system_message),
                 ("human", f"{self.input_text}"),
             ]
 
@@ -307,6 +302,7 @@ class Minal:
                     _response = self.handle_streaming(chain_llm)
                 else:
                     _response = chain_llm.invoke({"input_text": self.input_text})
+
                     print(_response.content)
                     if self.token_usage:
                         completion_tokens, prompt_tokens = (
@@ -386,14 +382,9 @@ class Minal:
 
         if provider == "OpenAI API":
             # Check if the response or chunk contains 'usage_metadata' or 'token_usage'
-            usage = getattr(response, "usage_metadata", None) or getattr(
-                response, "token_usage", None
-            )
-            if usage:
-                completion_tokens = usage.get("total_tokens", 0)
-                prompt_tokens = usage.get("input_tokens", 0)
-            else:
-                logger.error("No token usage data available in response.")
+            token_usage = response.response_metadata.get("token_usage", {})
+            completion_tokens = token_usage.get("completion_tokens", 0)
+            prompt_tokens = token_usage.get("prompt_tokens", 0)
         else:
             # For GROQ or other providers, ensure compatibility with token usage extraction
             usage_metadata = getattr(response, "usage_metadata", None)
