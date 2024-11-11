@@ -117,7 +117,7 @@ def get_session_history(session_id):
     return SQLChatMessageHistory(session_id, "sqlite:///memory.db")
 
 
-def save_chat_history(session_id: str, chat_history: BaseChatMessageHistory):
+def save_chat_history(session_id: str, chat_history):
     """
     Save chat history to a JSON file by appending new messages.
 
@@ -127,18 +127,28 @@ def save_chat_history(session_id: str, chat_history: BaseChatMessageHistory):
     """
     file_path = f"{session_id}_history.json"
 
-    new_messages = [
-        (
-            {"type": "human", "content": message.content}
-            if isinstance(message, HumanMessage)
-            else {
-                "type": "ai",
+    new_messages = []
+    for message in chat_history.messages:
+        if isinstance(message, HumanMessage):
+            new_message = {
+                "type": "human",
                 "content": message.content,
-                "metadata": message.response_metadata,
             }
-        )
-        for message in chat_history.messages
-    ]
+        else:  # Assuming it's an AI message or dictionary representation
+            new_message = {
+                "type": "ai",
+                "content": (
+                    getattr(message, "content", message.get("content", ""))
+                    if isinstance(message, dict)
+                    else getattr(message, "content", "")
+                ),
+                "metadata": (
+                    getattr(message, "response_metadata", message.get("metadata", {}))
+                    if isinstance(message, dict)
+                    else getattr(message, "response_metadata", {})
+                ),
+            }
+        new_messages.append(new_message)
 
     combined_messages = []
 
