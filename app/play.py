@@ -2,12 +2,12 @@
 Play file to run the CLI tool to generate the completion from Langchain Using GROQ
 """
 
-from utils import *  # noqa F403
-from imports import *  # noqa F403
-from config import TOOL_NAME, VERSION, OPEN_AI_MODELS_URL
+from app.utils import *  # noqa F403
+from app.imports import *  # noqa F403
+from app.config import TOOL_NAME, VERSION, OPEN_AI_MODELS_URL
 import sys
 import os
-from completion_tool import Minal
+from app.completion_tool import Minal
 
 
 # NEED TO ADD THIS LINE TO IMPORT THE CONFIG FILE
