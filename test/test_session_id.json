@@ -1,0 +1,4 @@
+[
+  { "type": "human", "content": "Hello" },
+  { "type": "ai", "content": "AI response", "metadata": { "info": "metadata" } }
+]
