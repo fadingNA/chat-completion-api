@@ -1,12 +1,10 @@
 from calendar import c
+import traceback
 import unittest
 import os
 import json
 from unittest.mock import patch, MagicMock, mock_open
-from app.utils import (
-    save_chat_history,
-    extract_chunk_token_usage,
-)
+from app.utils import save_chat_history, extract_chunk_token_usage, get_file_content
 from app.imports import HumanMessage, BaseChatMessageHistory
 
 
@@ -59,6 +57,38 @@ class TestUtils(unittest.TestCase):
             {"type": "ai", "content": "AI response", "metadata": {"info": "metadata"}},
         ]
         self.assertEqual(written_data, expected_data)
+
+    @patch("builtins.open", new_callable=mock_open, read_data='{"key": "value"}')
+    @patch("app.utils.logger")
+    def test_get_file_content_json_file(self, mock_logger, mock_file):
+        # Test reading a JSON file
+        file_path = "test_file.json"
+        expected_content = json.dumps({"key": "value"}, indent=4)
+
+        result = get_file_content(file_path)
+        mock_file.assert_called_once_with(file_path, "r")
+        self.assertEqual(result, expected_content)
+        mock_logger.info.assert_called_with(
+            f"Reading context from JSON file: {file_path}"
+        )
+
+    @patch(
+        "builtins.open",
+        new_callable=mock_open,
+        read_data="This is a text file content.",
+    )
+    @patch("app.utils.logger")
+    def test_get_file_content_text_file(self, mock_logger, mock_file):
+        # Test reading a text file
+        file_path = "test_file.txt"
+        expected_content = "This is a text file content."
+
+        result = get_file_content(file_path)
+        mock_file.assert_called_once_with(file_path, "r", encoding="utf-8")
+        self.assertEqual(result, expected_content)
+        mock_logger.info.assert_called_with(
+            f"Reading context from text file: {file_path}"
+        )
 
 
 if __name__ == "__main__":
