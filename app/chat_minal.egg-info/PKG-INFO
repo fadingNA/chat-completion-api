@@ -1,39 +1,47 @@
-<h1 align='center'> 
-Chat Minal
-</h1>
+Metadata-Version: 2.1
+Name: chat-minal
+Version: 1.0
+Summary: Chat Completion running on CLI using Language, support OpenAI and Groq
+Author-email: Nonthachai Plodthong <nplodthong@myseneca.ca>
+Project-URL: Homepage, https://github.com/fadingNA/chat-completion-api
+Project-URL: Issues, https://github.com/fadingNA/chat-completion-api/issues
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.11
+Description-Content-Type: text/markdown
+License-File: LICENSE
 
-<div align="center ">
+# chat-minal
 
-<a href="https://github.com/fadingNA/chat-minal">![link to main GitHub showing Stars number](https://img.shields.io/github/stars/fadingNA/chat-completion-api)</a>
-<a href="https://github.com/arc53/DocsGPT/blob/main/LICENSE">![link to license file](https://img.shields.io/github/license/fadingNA/chat-completion-api)</a>
-
-</div>
-
-<div class="pypi-project-promo">
-    <h1>Chat-Minal</h1>
-    <p>
-        The chat-minal is a command-line tool work on terminal that makes it easy to interact with the OpenAI Chat Completion API using Langchain. This tool allows you to send text prompts and receive AI-generated responses directly from the command line. You can customize the model, set parameters like temperature and token limits, and save the output to a file.
-    </p>
-    <p><strong>Features:</strong></p>
-    <ul>
-        <li>Easy-to-use CLI for interacting with OpenAI's API</li>
-        <li>Customizable model settings and parameters</li>
-        <li>Predefined prompts for common tasks</li>
-        <li>Streaming responses and flexible output options</li>
-    </ul>
-    <p>
-        <a href="https://pypi.org/project/chat-minal/1.0/" target="_blank">View on PyPI</a> | 
-        <a href="https://github.com/fadingNA/chat-completion-api" target="_blank">GitHub Repository</a>
-    </p>
-    <h2>Installation</h2>
-    <pre><code>pip install chat-minal</code></pre>
-    <h2>Quick Start</h2>
-    <pre><code>chat-minal -i "Tell me a joke" --api_key your_openai_api_key</code></pre>
-</div>
+The chat-minal is a command-line tool work on terminal that makes it easy to interact with the OpenAI Chat Completion API using Langchain. This tool allows you to send text prompts and receive AI-generated responses directly from the command line. You can customize the model, set parameters like temperature and token limits, and save the output to a file. 
 
 > Added new feature 0.1.1 pre defined prompt user can select choice for make genAI running task without input text or prompt.
 
 References [Langchain Document](https://api.python.langchain.com/en/latest/llms/langchain_openai.llms.base.OpenAI.html)
+
+## Demo walkthrough the chatminal
+
+Demo Link [chat-minal tutorial](https://youtu.be/NT175YPU-FY)
+
+## Example of Usage
+
+<center>
+
+![Code Review in Chat Completion Tool](assets/code_reviews.png)
+*Figure 1: Code Review in Chat Completion Tool*
+
+![Convert JSON to CSV](assets/convert_json_tocsv.png)
+*Figure 2: Converting JSON to CSV using the Tool*
+
+![Generate Markdown from Text](assets/generate_markdown.png)
+*Figure 3: Generating Markdown from Text with Ease*
+
+![Summarize Text](assets/summarize_text.png)
+*Figure 4: Summarizing Text in the Chat Completion Tool*
+
+</center>
+
 
 ## Overview
 
@@ -46,6 +54,7 @@ Langchain is a Python or Javascript library that provide a flexibility to intera
 - Vectorization: Vectorization is a process of converting text data into a numerical representation. It is a fundamental step in natural language processing (NLP) tasks, such as text classification, sentiment analysis, and named entity recognition. Vectorization transforms text data into a format that machine learning models can process and analyze.
 
 - RAG: Retrieval-Augmented Generation (RAG) is a model architecture that combines retrieval and generation to improve the quality of text generation tasks. RAG leverages a retriever to retrieve relevant information from a large corpus of text and a generator to generate responses based on the retrieved information. This approach enables the model to generate more accurate and contextually relevant responses.
+
 
 ## Features
 
@@ -70,7 +79,6 @@ Langchain is a Python or Javascript library that provide a flexibility to intera
    ```
 
 ## Usage
-
 - locate to examples folder to run the bash script
 
   ```bash
@@ -79,38 +87,39 @@ Langchain is a Python or Javascript library that provide a flexibility to intera
    -i "Tell me about directional derivatives" \ # input text
    --temperature 0.7 \
    --max_tokens 150 \
-   --model gpt-4 \ # gpt-4o or gpt-4
+   --model gpt-4 \ # gpt-4o or gpt-4 
    --output output.txt \
-
+   
   ```
 
 ## Options
 
-| Option                | Description                                   |
-| --------------------- | --------------------------------------------- |
-| `-h, --help, --howto` | Show the help message.                        |
-| `-v, --version`       | Show the version of the tool.                 |
-| `--input_text, -i`    | Input text to generate completion.            |
-| `--output, -o`        | Output file to save the generated completion. |
-| `--temperature, -t`   | Temperature for the completion.               |
-| `--max_tokens`        | Maximum tokens for the completion.            |
-| `--api_key, -a`       | OpenAI API Key.                               |
-| `--model, -m`         | Model for the completion.                     |
-| `--models`            | List all available models on OpenAI.          |
-| `--select_choices`    | Will use a pre defined prompt                 |
-| `--token-usage`       | Token usage for the completion.               |
+| Option               | Description                                         |
+|----------------------|-----------------------------------------------------|
+| `-h, --help, --howto`| Show the help message.                               |
+| `-v, --version`      | Show the version of the tool.                        |
+| `--input_text, -i`   | Input text to generate completion.                   |
+| `--output, -o`       | Output file to save the generated completion.        |
+| `--temperature, -t`  | Temperature for the completion.                      |
+| `--max_tokens`       | Maximum tokens for the completion.                   |
+| `--api_key, -a`      | OpenAI API Key.                                      |
+| `--model, -m`        | Model for the completion.                            |
+| `--models`           | List all available models on OpenAI.                 |
+| `--select_choices`   | Will use a pre defined prompt                        |
+| `--token-usage`     | Token usage for the completion.                      |
 
 ## Requirements
 
 - Python 3.7+
 - An OpenAI API key
 
+
 ## Table of Contributors
 
-| Name                 | Blog Post (URL)                                                   | GitHub Repo (URL)                                              | Language     |
-| -------------------- | ----------------------------------------------------------------- | -------------------------------------------------------------- | ------------ |
-| Nonthachai Plodthong | [Blog Post](https://dev.to/fadingna/open-source-development-187j) | [GitHub Repo](https://github.com/fadingNA/chat-completion-api) | Python + SSH |
+| Name          | Blog Post (URL)                  | GitHub Repo (URL)                       | Language    |
+|---------------|---------------------------------|-----------------------------------------|-------------|
+| Nonthachai Plodthong    | [Blog Post](https://dev.to/fadingna/open-source-development-187j) | [GitHub Repo](https://github.com/fadingNA/chat-completion-api) | Python + SSH |
+
 
 # License
-
 This project is licensed under the MIT License - see the [LICENSE](https://github.com/fadingNA/chat-completion-api/blob/main/LICENSE) file for details.

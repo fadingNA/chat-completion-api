@@ -1,3 +1,9 @@
 venv/
 __pycache__/
 *.pyc
+
+
+# Exclude Package Pyproject
+pyproject.toml
+
+dist/

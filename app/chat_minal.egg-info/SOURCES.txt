@@ -1,0 +1,9 @@
+LICENSE
+README.md
+pyproject.toml
+app/chat_minal.egg-info/PKG-INFO
+app/chat_minal.egg-info/SOURCES.txt
+app/chat_minal.egg-info/dependency_links.txt
+app/chat_minal.egg-info/top_level.txt
+test/test_minal.py
+test/test_utils.py
