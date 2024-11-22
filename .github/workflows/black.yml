@@ -1,9 +1,9 @@
-name: Black Code Formatter
+name: Black Code Formatting
 
 on:
   workflow_run:
     workflows:
-      - install dependencies chatminal
+      - Main CI Workflow
     types:
       - completed
 
@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.11"]
+        python-version: ["3.10", "3.11", "3.12"]
 
     steps:
       - name: Checkout code
@@ -31,5 +31,5 @@ jobs:
 
       - name: Run Black
         run: |
-          pip install black
+          python -m pip install black
           black --check .

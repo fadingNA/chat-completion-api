@@ -1,4 +1,4 @@
-name: install dependencies chatminal
+name: Main CI Workflow
 
 on:
   push:

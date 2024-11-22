@@ -3,7 +3,7 @@ name: Flake8 Linting
 on:
   workflow_run:
     workflows:
-      - install dependencies chatminal
+      - Main CI Workflow
     types:
       - completed
 
@@ -31,5 +31,5 @@ jobs:
 
       - name: Run Flake8
         run: |
-          pip install flake8
+          python -m pip install flake8
           flake8 ./app/*.py
