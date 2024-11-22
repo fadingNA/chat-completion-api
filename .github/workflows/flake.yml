@@ -3,7 +3,7 @@ name: Flake8 Linting
 on:
   workflow_run:
     workflows:
-      - Main CI Workflow
+      - install dependencies chatminal
     types:
       - completed
 

@@ -3,7 +3,7 @@ name: Black Code Formatter
 on:
   workflow_run:
     workflows:
-      - Main CI Workflow
+      - install dependencies chatminal
     types:
       - completed
 
