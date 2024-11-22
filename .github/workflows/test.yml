@@ -29,6 +29,9 @@ jobs:
           name: python-dependencies
           path: ~/.cache/pip
 
+      - name: Verify pip cache
+        run: ls -la ~/.cache/pip
+
       - name: Run Tests
         run: |
           python -m unittest discover -s test
