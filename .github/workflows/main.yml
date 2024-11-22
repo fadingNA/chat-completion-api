@@ -3,10 +3,10 @@ name: Chatminal CI Pipeline test, lint, and flake
 on:
   push:
     branches:
-      - main
+      - "*"
   pull_request:
     branches:
-      - main
+      - "*"
 
 jobs:
   build:
